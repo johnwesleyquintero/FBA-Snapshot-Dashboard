@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FBA Snapshot Dashboard v2.0</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><polygon points='8,0 16,16 0,16' fill='%239c4dff'/></svg>">
+<style>
+:root {
+  --primary: #9c4dff;
+  --primary-dark: #7a33ff;
+  --secondary: #6c34ff;
+  --success: #2ecc71;
+  --warning: #f39c12;
+  --danger: #e74c3c;
+  --light: #f8f9fa;
+  --dark: #212529;
+  --gray: #6c757d;
+  --border: #dee2e6;
+  --card-bg: #ffffff;
+  --bg: #f5f7fa;
+  --shadow: 0 4px 20px rgba(0,0,0,0.08);
+  --transition: all 0.3s ease;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--dark);
+  line-height: 1.6;
+  padding: 20px;
+  min-height: 100vh;
+}
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.header {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+.header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.controls {
+  padding: 25px 30px;
+  background: var(--light);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.file-upload {
+  display: flex;
+  flex: 1;
+  min-width: 250px;
+}
+.file-upload input[type="file"] {
+  flex: 1;
+  padding: 12px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+.btn-success:hover {
+  background: #27ae60;
+}
+.btn-secondary {
+  background: var(--secondary);
+  color: white;
+}
+.btn-secondary:hover {
+  background: #5a26d8;
+}
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px 30px;
+  background: var(--light);
+  border-bottom: 1px solid var(--border);
+}
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border-left: 4px solid var(--primary);
+}
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 10px 0;
+}
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+.table-container {
+  padding: 20px;
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+th {
+  background: #f1f3f9;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+th, td {
+  padding: 14px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  font-weight: 600;
+  color: var(--dark);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+tr:nth-child(even) {
+  background-color: #fafbff;
+}
+tr:hover {
+  background-color: #f0f4ff;
+}
+.highlight {
+  background-color: #fff8e1 !important;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { background-color: #fff8e1; }
+  50% { background-color: #fff0c1; }
+  100% { background-color: #fff8e1; }
+}
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.status-recommendation {
+  background: #ffebee;
+  color: var(--danger);
+}
+.status-normal {
+  background: #e8f5e9;
+  color: var(--success);
+}
+.status-warning {
+  background: #fff3e0;
+  color: var(--warning);
+}
+.sku-cell {
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--primary);
+}
+.asin-cell {
+  font-family: monospace;
+  color: var(--secondary);
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.page-btn {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  background: white;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+.page-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.page-btn:hover:not(.active) {
+  background: #f0f0f0;
+}
+.search-box {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 15px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.filter-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--gray);
+}
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  opacity: 0.3;
+}
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 1.8rem;
+  }
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .file-upload {
+    width: 100%;
+  }
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🚀 FBA Snapshot Dashboard v2.0</h1>
+    <p>Upload your FBA inventory report to get instant insights and recommendations</p>
+  </div>
+  
+  <div class="controls">
+    <div class="file-upload">
+      <input type="file" id="csvFile" accept=".csv" placeholder="Select CSV file">
+    </div>
+    <button id="processBtn" class="btn btn-primary">
+      <span>📊 Process Snapshot</span>
+    </button>
+    <button id="downloadBtn" class="btn btn-success">
+      <span>⬇️ Export Clean Data</span>
+    </button>
+    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search by SKU, ASIN, or Product Name...">
+    <div class="filter-controls">
+      <select id="conditionFilter" class="btn btn-secondary">
+        <option value="">All Conditions</option>
+        <option value="New">New</option>
+        <option value="Used">Used</option>
+      </select>
+      <select id="actionFilter" class="btn btn-secondary">
+        <option value="">All Actions</option>
+        <option value="removal">Recommended Removal</option>
+        <option value="normal">No Action</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="stats-container" id="statsContainer">
+    <div class="stat-card">
+      <div class="stat-label">Total Products</div>
+      <div class="stat-value" id="totalProducts">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Available Inventory</div>
+      <div class="stat-value" id="totalAvailable">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pending Removals</div>
+      <div class="stat-value" id="totalPending">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg. 30-Day Shipments</div>
+      <div class="stat-value" id="avgShipped">0</div>
+    </div>
+  </div>
+  
+  <div class="table-container">
+    <table id="dashboardTable">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>ASIN</th>
+          <th>Product Name</th>
+          <th>Condition</th>
+          <th>Available</th>
+          <th>Pending Removal</th>
+          <th>Total Inventory Age</th>
+          <th>Units Shipped T30</th>
+          <th>Recommended Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr>
+          <td colspan="9" class="empty-state">
+            <div>📁 Upload an FBA Snapshot CSV to get started</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="pagination" id="paginationContainer"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script>
+class FBADashboard {
+  constructor() {
+    this.rawData = [];
+    this.filteredData = [];
+    this.currentPage = 1;
+    this.itemsPerPage = 50;
+    this.init();
+  }
+  
+  init() {
+    document.getElementById('processBtn').addEventListener('click', () => this.processCSV());
+    document.getElementById('downloadBtn').addEventListener('click', () => this.downloadCSV());
+    document.getElementById('searchInput').addEventListener('input', () => this.applyFilters());
+    document.getElementById('conditionFilter').addEventListener('change', () => this.applyFilters());
+    document.getElementById('actionFilter').addEventListener('change', () => this.applyFilters());
+  }
+  
+  processCSV() {
+    const file = document.getElementById('csvFile').files[0];
+    if (!file) {
+      alert("Please select a CSV file first!");
+      return;
+    }
+    
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        this.rawData = results.data.map(row => ({
+          sku: row['sku'] || '',
+          asin: row['asin'] || '',
+          name: row['product-name'] || '',
+          condition: row['condition'] || '',
+          available: Number(row['available'] || 0),
+          pendingRemoval: Number(row['pending-removal-quantity'] || 0),
+          totalInvAge: Number(row['inv-age-0-to-90-days'] || 0) +
+                       Number(row['inv-age-91-to-180-days'] || 0) +
+                       Number(row['inv-age-181-to-270-days'] || 0) +
+                       Number(row['inv-age-271-to-365-days'] || 0) +
+                       Number(row['inv-age-365-plus-days'] || 0),
+          shippedT30: Number(row['units-shipped-t30'] || 0),
+          recommendedAction: row['recommended-action'] || 'No Action'
+        }));
+        
+        this.filteredData = [...this.rawData];
+        this.updateStats();
+        this.renderTable();
+        this.renderPagination();
+        alert(`✅ Processed ${this.rawData.length} products!`);
+      },
+      error: (error) => {
+        console.error('CSV parsing error:', error);
+        alert('Error parsing CSV file. Please check the file format.');
+      }
+    });
+  }
+  
+  updateStats() {
+    const totalProducts = this.rawData.length;
+    const totalAvailable = this.rawData.reduce((sum, item) => sum + item.available, 0);
+    const totalPending = this.rawData.reduce((sum, item) => sum + item.pendingRemoval, 0);
+    const avgShipped = totalProducts > 0 
+      ? Math.round(this.rawData.reduce((sum, item) => sum + item.shippedT30, 0) / totalProducts) 
+      : 0;
+    
+    document.getElementById('totalProducts').textContent = totalProducts.toLocaleString();
+    document.getElementById('totalAvailable').textContent = totalAvailable.toLocaleString();
+    document.getElementById('totalPending').textContent = totalPending.toLocaleString();
+    document.getElementById('avgShipped').textContent = avgShipped.toLocaleString();
+  }
+  
+  applyFilters() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const conditionFilter = document.getElementById('conditionFilter').value;
+    const actionFilter = document.getElementById('actionFilter').value;
+    
+    this.filteredData = this.rawData.filter(item => {
+      const matchesSearch = 
+        item.sku.toLowerCase().includes(searchTerm) ||
+        item.asin.toLowerCase().includes(searchTerm) ||
+        item.name.toLowerCase().includes(searchTerm);
+      
+      const matchesCondition = conditionFilter === '' || item.condition === conditionFilter;
+      const matchesAction = actionFilter === '' || 
+        (actionFilter === 'removal' && item.recommendedAction.toLowerCase().includes('removal')) ||
+        (actionFilter === 'normal' && !item.recommendedAction.toLowerCase().includes('removal'));
+      
+      return matchesSearch && matchesCondition && matchesAction;
+    });
+    
+    this.currentPage = 1;
+    this.renderTable();
+    this.renderPagination();
+  }
+  
+  renderTable() {
+    const tbody = document.getElementById('tableBody');
+    if (this.filteredData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" class="empty-state">🔍 No products match your filters</td></tr>';
+      return;
+    }
+    
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    const pageData = this.filteredData.slice(start, end);
+    
+    tbody.innerHTML = pageData.map(item => {
+      const needsAttention = item.recommendedAction.toLowerCase().includes('removal');
+      return `
+        <tr class="${needsAttention ? 'highlight' : ''}">
+          <td class="sku-cell">${item.sku}</td>
+          <td class="asin-cell">${item.asin}</td>
+          <td>${item.name}</td>
+          <td>${item.condition}</td>
+          <td>${item.available.toLocaleString()}</td>
+          <td>${item.pendingRemoval.toLocaleString()}</td>
+          <td>${item.totalInvAge.toLocaleString()}</td>
+          <td>${item.shippedT30.toLocaleString()}</td>
+          <td>
+            <span class="status-badge ${needsAttention ? 'status-recommendation' : 'status-normal'}">
+              ${item.recommendedAction}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+  
+  renderPagination() {
+    const totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
+    const container = document.getElementById('paginationContainer');
+    
+    if (totalPages <= 1) {
+      container.innerHTML = '';
+      return;
+    }
+    
+    let paginationHTML = '';
+    
+    // Previous button
+    paginationHTML += `<button class="page-btn" onclick="dashboard.goToPage(${this.currentPage > 1 ? this.currentPage - 1 : 1})" ${this.currentPage === 1 ? 'disabled' : ''}>←</button>`;
+    
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= this.currentPage - 2 && i <= this.currentPage + 2)) {
+        paginationHTML += `<button class="page-btn ${i === this.currentPage ? 'active' : ''}" onclick="dashboard.goToPage(${i})">${i}</button>`;
+      } else if (i === this.currentPage - 3 || i === this.currentPage + 3) {
+        paginationHTML += '<span>...</span>';
+      }
+    }
+    
+    // Next button
+    paginationHTML += `<button class="page-btn" onclick="dashboard.goToPage(${this.currentPage < totalPages ? this.currentPage + 1 : totalPages})" ${this.currentPage === totalPages ? 'disabled' : ''}>→</button>`;
+    
+    container.innerHTML = paginationHTML;
+  }
+  
+  goToPage(page) {
+    const totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
+    if (page < 1 || page > totalPages) return;
+    
+    this.currentPage = page;
+    this.renderTable();
+    this.renderPagination();
+  }
+  
+  downloadCSV() {
+    if (this.filteredData.length === 0) {
+      alert("No data to download. Process a CSV first.");
+      return;
+    }
+    
+    const csv = Papa.unparse(this.filteredData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fba_clean_snapshot_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+// Initialize dashboard
+const dashboard = new FBADashboard();
+</script>
+</body>
+</html>
