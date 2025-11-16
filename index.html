@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FBA Snapshot Dashboard v2.2</title>
+<title>WesBI - FBA Analytics Dashboard</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><polygon points='8,0 16,16 0,16' fill='%239c4dff'/></svg>">
 <style>
 :root {
@@ -22,11 +22,7 @@
   --shadow: 0 4px 20px rgba(0,0,0,0.08);
   --transition: all 0.3s ease;
 }
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
@@ -35,349 +31,116 @@ body {
   padding: 20px;
   min-height: 100vh;
 }
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  background: var(--card-bg);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.header {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-  padding: 30px;
-  text-align: center;
-}
-.header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-}
-.header p {
-  font-size: 1.1rem;
-  opacity: 0.9;
-  max-width: 700px;
-  margin: 0 auto;
-}
-.controls {
-  padding: 25px 30px;
-  background: var(--light);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
-}
-.file-upload {
-  display: flex;
-  flex: 1;
-  min-width: 250px;
-}
-.file-upload input[type="file"] {
-  flex: 1;
-  padding: 12px;
-  border: 2px dashed var(--border);
-  border-radius: 8px;
-  font-size: 1rem;
-}
-.btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
+.container { max-width: 1400px; margin: 0 auto; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; position: relative; }
+.header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 30px; text-align: center; }
+.header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+.header p { font-size: 1.1rem; opacity: 0.9; max-width: 700px; margin: 0 auto; }
+.controls { padding: 25px 30px; background: var(--light); display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border-bottom: 1px solid var(--border); }
+.file-upload { display: flex; flex: 1; min-width: 250px; position: relative; }
+.file-upload input[type="file"] { 
+  flex: 1; 
+  padding: 12px 12px 12px 120px; 
+  border: 2px dashed var(--border); 
+  border-radius: 8px; 
+  font-size: 1rem; 
   cursor: pointer;
-  font-weight: 600;
-  transition: var(--transition);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
 }
-.btn-primary {
-  background: var(--primary);
-  color: white;
-}
-.btn-primary:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-}
-.btn-success {
-  background: var(--success);
-  color: white;
-}
-.btn-success:hover {
-  background: #27ae60;
-}
-.btn-secondary {
-  background: var(--secondary);
-  color: white;
-}
-.btn-secondary:hover {
-  background: #5a26d8;
-}
-.stats-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 20px;
-  padding: 20px 30px;
-  background: var(--light);
-  border-bottom: 1px solid var(--border);
-}
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  border-left: 4px solid var(--primary);
-}
-.stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin: 10px 0;
-}
-.stat-label {
-  font-size: 0.9rem;
-  color: var(--gray);
-}
-.chart-container {
-  padding: 20px 30px;
-  background: var(--light);
-  border-bottom: 1px solid var(--border);
-}
-.chart-title {
-  text-align: center;
-  margin-bottom: 15px;
-  color: var(--dark);
-  font-weight: 600;
-}
-.chart {
-  height: 100px;
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  justify-content: center;
-  padding: 10px 0;
-}
-.bar {
-  flex: 1;
-  background: var(--primary);
-  min-width: 30px;
-  transition: height 0.5s ease;
-}
-.bar-label {
-  font-size: 0.7rem;
-  text-align: center;
-  color: var(--gray);
-  margin-top: 5px;
-}
-.column-toggle {
-  padding: 15px 30px;
-  background: white;
-  border-bottom: 1px solid var(--border);
-}
-.column-toggle h3 {
-  margin-bottom: 10px;
-  color: var(--dark);
-}
-.column-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-.column-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.column-option input {
-  margin: 0;
-}
-.table-container {
-  padding: 20px;
-  overflow-x: auto;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 1000px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-th {
-  background: #f1f3f9;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  cursor: pointer;
-  user-select: none;
-}
-th:hover {
-  background: #e6e9f5;
-}
-th.sort-asc::after {
-  content: " ▲";
-  color: var(--primary);
-}
-th.sort-desc::after {
-  content: " ▼";
-  color: var(--primary);
-}
-th, td {
-  padding: 14px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-th {
-  font-weight: 600;
-  color: var(--dark);
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
-}
-tr:nth-child(even) {
-  background-color: #fafbff;
-}
-tr:hover {
-  background-color: #f0f4ff;
-}
-.highlight {
-  background-color: #fff8e1 !important;
-  animation: pulse 2s infinite;
-}
-.status-warning {
-  background-color: #fff3cd !important;
-  animation: pulseWarning 3s infinite;
-}
-.status-both {
-  background: linear-gradient(45deg, #fff8e1, #fff3cd) !important;
-  animation: pulseBoth 3s infinite;
-}
-@keyframes pulse {
-  0% { background-color: #fff8e1; }
-  50% { background-color: #fff0c1; }
-  100% { background-color: #fff8e1; }
-}
-@keyframes pulseWarning {
-  0% { background-color: #fff3cd; }
-  50% { background-color: #ffeaa7; }
-  100% { background-color: #fff3cd; }
-}
-@keyframes pulseBoth {
-  0% { background: linear-gradient(45deg, #fff8e1, #fff3cd); }
-  50% { background: linear-gradient(45deg, #fff0c1, #ffeaa7); }
-  100% { background: linear-gradient(45deg, #fff8e1, #fff3cd); }
-}
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-.status-recommendation {
-  background: #ffebee;
-  color: var(--danger);
-}
-.status-normal {
-  background: #e8f5e9;
-  color: var(--success);
-}
-.status-warning-badge {
-  background: #fff3cd;
-  color: #856404;
-}
-.sku-cell {
-  font-family: monospace;
-  font-weight: 600;
-  color: var(--primary);
-}
-.asin-cell {
-  font-family: monospace;
-  color: var(--secondary);
-}
-.pagination {
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.page-btn {
-  padding: 8px 14px;
-  border: 1px solid var(--border);
-  background: white;
-  cursor: pointer;
+.file-upload input[type="file"]::file-selector-button {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  height: calc(100% - 4px);
+  border: 0;
   border-radius: 6px;
-  transition: var(--transition);
-}
-.page-btn.active {
   background: var(--primary);
   color: white;
-  border-color: var(--primary);
+  padding: 0 16px;
+  margin-right: 10px;
+  cursor: pointer;
 }
-.page-btn:hover:not(.active) {
-  background: #f0f0f0;
+.file-upload input[type="file"]:hover::file-selector-button {
+  background: var(--primary-dark);
 }
-.search-box {
-  flex: 1;
-  min-width: 200px;
-  padding: 12px 15px;
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  font-size: 1rem;
-}
-.filter-controls {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--gray);
-}
-.empty-state i {
-  font-size: 3rem;
-  margin-bottom: 20px;
-  opacity: 0.3;
-}
+.btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #27ae60; }
+.btn-secondary { background: var(--secondary); color: white; }
+.btn-secondary:hover { background: #5a26d8; }
+.btn-compare { background: #3498db; color: white; }
+.btn-compare:hover { background: #2980b9; }
+.stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px 30px; background: var(--light); border-bottom: 1px solid var(--border); }
+.stat-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); position: relative; cursor: pointer; transition: var(--transition); }
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+.stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); margin: 10px 0; }
+.stat-label { font-size: 0.9rem; color: var(--gray); }
+.stat-change { font-size: 0.8rem; padding: 2px 8px; border-radius: 12px; margin-top: 5px; display: inline-block; }
+.change-up { background: #e8f7f0; color: var(--success); }
+.change-down { background: #fdecea; color: var(--danger); }
+.change-neutral { background: #f0f4f8; color: var(--gray); }
+.sparkline { height: 30px; margin-top: 10px; display: flex; align-items: end; gap: 1px; }
+.spark-bar { flex: 1; background: var(--primary); min-width: 2px; }
+.charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px 30px; background: var(--light); border-bottom: 1px solid var(--border); }
+.chart-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.chart-title { font-size: 1rem; font-weight: 600; margin-bottom: 10px; color: var(--dark); }
+.chart-container { height: 200px; position: relative; }
+.table-container { padding: 20px; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 1000px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+th { background: #f1f3f9; position: sticky; top: 0; z-index: 10; cursor: pointer; user-select: none; }
+th:hover { background: #e6e9f5; }
+th.sort-asc::after { content: " ▲"; color: var(--primary); }
+th.sort-desc::after { content: " ▼"; color: var(--primary); }
+th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+th { font-weight: 600; color: var(--dark); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+tr:nth-child(even) { background-color: #fafbff; }
+tr:hover { background-color: #f0f4ff; }
+.highlight { background-color: #fff8e1 !important; animation: pulse 2s infinite; }
+.status-warning { background-color: #fff3cd !important; animation: pulseWarning 3s infinite; }
+@keyframes pulse { 0% { background-color: #fff8e1; } 50% { background-color: #fff0c1; } 100% { background-color: #fff8e1; } }
+@keyframes pulseWarning { 0% { background-color: #fff3cd; } 50% { background-color: #ffeaa7; } 100% { background-color: #fff3cd; } }
+.status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
+.status-recommendation { background: #ffebee; color: var(--danger); }
+.status-normal { background: #e8f5e9; color: var(--success); }
+.status-warning-badge { background: #fff3cd; color: #856404; }
+.sku-cell { font-family: monospace; font-weight: 600; color: var(--primary); }
+.asin-cell { font-family: monospace; color: var(--secondary); }
+.pagination { display: flex; justify-content: center; padding: 20px; gap: 10px; flex-wrap: wrap; }
+.page-btn { padding: 8px 14px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 6px; transition: var(--transition); }
+.page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+.page-btn:hover:not(.active) { background: #f0f0f0; }
+.search-box { flex: 1; min-width: 200px; padding: 12px 15px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; }
+.filter-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--gray); }
+.empty-state i { font-size: 3rem; margin-bottom: 20px; opacity: 0.3; }
+.loader-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); display:flex; justify-content:center; align-items:center; font-size:1.5rem; color: var(--primary); display:none; z-index:100; }
+.snapshot-selector { display: flex; gap: 10px; align-items: center; }
+.snapshot-selector select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); }
+.compare-controls { display: flex; gap: 10px; align-items: center; }
+.compare-controls select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); }
 @media (max-width: 768px) {
-  .header h1 {
-    font-size: 1.8rem;
-  }
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .file-upload {
-    width: 100%;
-  }
-  .stats-container {
-    grid-template-columns: 1fr;
-  }
-  .btn {
-    width: 100%;
-    justify-content: center;
-  }
+  .header h1 { font-size: 1.8rem; }
+  .controls { flex-direction: column; align-items: stretch; }
+  .file-upload { width: 100%; }
+  .btn { width: 100%; justify-content: center; }
 }
 </style>
 </head>
 <body>
 <div class="container">
+  <div class="loader-overlay" id="loader">⏳ Processing...</div>
   <div class="header">
-    <h1>🚀 FBA Snapshot Dashboard v2.2</h1>
-    <p>Upload your FBA inventory report to get instant insights and recommendations</p>
+    <h1>🚀 WesBI - FBA Analytics Dashboard</h1>
+    <p>Advanced analytics for your Amazon inventory operations</p>
   </div>
   
   <div class="controls">
     <div class="file-upload">
       <input type="file" id="csvFile" accept=".csv" placeholder="Select CSV file">
     </div>
-    <button id="processBtn" class="btn btn-primary">
-      <span>📊 Process Snapshot</span>
-    </button>
-    <button id="downloadBtn" class="btn btn-success">
-      <span>⬇️ Export Clean Data</span>
-    </button>
+    <button id="processBtn" class="btn btn-primary">📊 Process Snapshot</button>
+    <button id="downloadBtn" class="btn btn-success">⬇️ Export Clean Data</button>
+    <button id="compareBtn" class="btn btn-compare">🔍 Compare Snapshots</button>
     <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search by SKU, ASIN, or Product Name...">
     <div class="filter-controls">
       <select id="conditionFilter" class="btn btn-secondary">
@@ -394,46 +157,79 @@ tr:hover {
     </div>
   </div>
   
-  <div class="chart-container">
-    <div class="chart-title">Inventory Age Distribution</div>
-    <div class="chart" id="inventoryChart"></div>
+  <div class="controls snapshot-selector">
+    <label for="snapshotSelect">Saved Snapshots:</label>
+    <select id="snapshotSelect">
+      <option value="">Select a snapshot...</option>
+    </select>
+    <button id="saveSnapshotBtn" class="btn btn-secondary">💾 Save Current</button>
+    <button id="deleteSnapshotBtn" class="btn btn-secondary">🗑️ Delete</button>
+  </div>
+  
+  <div class="controls compare-controls" style="display:none;" id="compareControls">
+    <label for="compareSnapshot1">Compare:</label>
+    <select id="compareSnapshot1">
+      <option value="">Select first snapshot...</option>
+    </select>
+    <label for="compareSnapshot2">vs</label>
+    <select id="compareSnapshot2">
+      <option value="">Select second snapshot...</option>
+    </select>
+    <button id="runCompareBtn" class="btn btn-compare">Run Comparison</button>
+    <button id="closeCompareBtn" class="btn btn-secondary">Close</button>
   </div>
   
   <div class="stats-container" id="statsContainer">
-    <div class="stat-card">
+    <div class="stat-card" data-filter="totalProducts">
       <div class="stat-label">Total Products</div>
       <div class="stat-value" id="totalProducts">0</div>
+      <div class="stat-change change-neutral" id="productsChange">0%</div>
+      <div class="sparkline" id="productsSparkline"></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-filter="totalAvailable">
       <div class="stat-label">Available Inventory</div>
       <div class="stat-value" id="totalAvailable">0</div>
+      <div class="stat-change change-neutral" id="inventoryChange">0%</div>
+      <div class="sparkline" id="inventorySparkline"></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-filter="totalPending">
       <div class="stat-label">Pending Removals</div>
       <div class="stat-value" id="totalPending">0</div>
+      <div class="stat-change change-up" id="pendingChange">+0%</div>
+      <div class="sparkline" id="pendingSparkline"></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-filter="avgShipped">
       <div class="stat-label">Avg. 30-Day Shipments</div>
       <div class="stat-value" id="avgShipped">0</div>
+      <div class="stat-change change-down" id="shippedChange">-0%</div>
+      <div class="sparkline" id="shippedSparkline"></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-filter="oldInventory">
       <div class="stat-label">Old Inventory (365+ days)</div>
       <div class="stat-value" id="oldInventory">0</div>
+      <div class="stat-change change-up" id="ageChange">+0%</div>
+      <div class="sparkline" id="ageSparkline"></div>
     </div>
   </div>
   
-  <div class="column-toggle">
-    <h3>Columns</h3>
-    <div class="column-options">
-      <label class="column-option"><input type="checkbox" data-column="sku" checked> SKU</label>
-      <label class="column-option"><input type="checkbox" data-column="asin" checked> ASIN</label>
-      <label class="column-option"><input type="checkbox" data-column="name" checked> Product Name</label>
-      <label class="column-option"><input type="checkbox" data-column="condition" checked> Condition</label>
-      <label class="column-option"><input type="checkbox" data-column="available" checked> Available</label>
-      <label class="column-option"><input type="checkbox" data-column="pendingRemoval" checked> Pending Removal</label>
-      <label class="column-option"><input type="checkbox" data-column="totalInvAge" checked> Total Inventory Age</label>
-      <label class="column-option"><input type="checkbox" data-column="shippedT30" checked> Units Shipped T30</label>
-      <label class="column-option"><input type="checkbox" data-column="recommendedAction" checked> Recommended Action</label>
+  <div class="charts-container" id="chartsContainer">
+    <div class="chart-card">
+      <div class="chart-title">Inventory Age Distribution</div>
+      <div class="chart-container">
+        <canvas id="ageChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top Pending Removals</div>
+      <div class="chart-container">
+        <canvas id="removalChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Shipped Units Distribution</div>
+      <div class="chart-container">
+        <canvas id="shippedChart"></canvas>
+      </div>
     </div>
   </div>
   
@@ -453,11 +249,7 @@ tr:hover {
         </tr>
       </thead>
       <tbody id="tableBody">
-        <tr>
-          <td colspan="9" class="empty-state">
-            <div>📁 Upload an FBA Snapshot CSV to get started</div>
-          </td>
-        </tr>
+        <tr><td colspan="9" class="empty-state">📁 Upload an FBA Snapshot CSV to get started</td></tr>
       </tbody>
     </table>
   </div>
@@ -465,9 +257,10 @@ tr:hover {
   <div class="pagination" id="paginationContainer"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
-class FBADashboard {
+class WesBI {
   constructor() {
     this.rawData = [];
     this.filteredData = [];
@@ -475,369 +268,433 @@ class FBADashboard {
     this.itemsPerPage = 50;
     this.sortColumn = null;
     this.sortDirection = 'asc';
-    this.visibleColumns = new Set(['sku', 'asin', 'name', 'condition', 'available', 'pendingRemoval', 'totalInvAge', 'shippedT30', 'recommendedAction']);
-    this.mapping = {
-      sku: 'sku',
-      asin: 'asin',
-      name: 'product-name',
-      condition: 'condition',
-      available: 'available',
-      pendingRemoval: 'pending-removal-quantity',
-      shippedT30: 'units-shipped-t30',
-      invAgeFields: [
-        'inv-age-0-to-90-days',
-        'inv-age-91-to-180-days',
-        'inv-age-181-to-270-days',
-        'inv-age-271-to-365-days',
-        'inv-age-365-plus-days'
-      ],
-      recommendedAction: 'recommended-action'
-    };
+    this.snapshots = JSON.parse(localStorage.getItem('wesbiSnapshots') || '{}');
+    this.currentSnapshotName = null;
+    this.chartInstances = {};
     this.init();
   }
   
   init() {
+    this.loader = document.getElementById('loader');
     document.getElementById('processBtn').addEventListener('click', () => this.processCSV());
     document.getElementById('downloadBtn').addEventListener('click', () => this.downloadCSV());
     document.getElementById('searchInput').addEventListener('input', () => this.applyFilters());
     document.getElementById('conditionFilter').addEventListener('change', () => this.applyFilters());
     document.getElementById('actionFilter').addEventListener('change', () => this.applyFilters());
     document.getElementById('resetFilters').addEventListener('click', () => this.resetFilters());
-    
-    // Add event listeners for table headers
-    document.querySelectorAll('th[data-sort]').forEach(header => {
-      header.addEventListener('click', () => this.sortTable(header.dataset.sort));
+    document.getElementById('saveSnapshotBtn').addEventListener('click', () => this.saveSnapshot());
+    document.getElementById('deleteSnapshotBtn').addEventListener('click', () => this.deleteSnapshot());
+    document.getElementById('compareBtn').addEventListener('click', () => this.toggleCompareMode());
+    document.getElementById('runCompareBtn').addEventListener('click', () => this.runComparison());
+    document.getElementById('closeCompareBtn').addEventListener('click', () => this.closeComparison());
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => this.sortTable(th.dataset.sort));
+    });
+    document.querySelectorAll('.stat-card').forEach(card => {
+      card.addEventListener('click', () => this.filterByCard(card.dataset.filter));
     });
     
-    // Add event listeners for column toggles
-    document.querySelectorAll('.column-options input[type="checkbox"]').forEach(checkbox => {
-      checkbox.addEventListener('change', () => this.toggleColumn(checkbox.dataset.column, checkbox.checked));
-    });
+    this.updateSnapshotSelector();
   }
-  
+
+  showLoader(show) { this.loader.style.display = show ? 'flex' : 'none'; }
+
   processCSV() {
     const file = document.getElementById('csvFile').files[0];
-    if (!file) {
-      alert("Please select a CSV file first!");
-      return;
-    }
+    if (!file) return alert("Please select a CSV file first!");
+    this.showLoader(true);
     
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        this.rawData = results.data.map(row => {
-          // Calculate total inventory age dynamically
-          const totalInvAge = this.mapping.invAgeFields.reduce((sum, field) => {
-            return sum + Number(row[field] || 0);
-          }, 0);
-          
-          return {
-            sku: row[this.mapping.sku] || '',
-            asin: row[this.mapping.asin] || '',
-            name: row[this.mapping.name] || '',
-            condition: row[this.mapping.condition] || '',
-            available: Number(row[this.mapping.available] || 0),
-            pendingRemoval: Number(row[this.mapping.pendingRemoval] || 0),
-            totalInvAge: totalInvAge,
-            shippedT30: Number(row[this.mapping.shippedT30] || 0),
-            recommendedAction: row[this.mapping.recommendedAction] || 'No Action'
-          };
-        });
-        
+        const ageKeys = ['inv-age-0-to-90-days','inv-age-91-to-180-days','inv-age-181-to-270-days','inv-age-271-to-365-days','inv-age-365-plus-days'];
+        this.rawData = results.data.map(row => ({
+          sku: row['sku'] || '',
+          asin: row['asin'] || '',
+          name: row['product-name'] || '',
+          condition: row['condition'] || '',
+          available: Number(row['available'] || 0),
+          pendingRemoval: Number(row['pending-removal-quantity'] || 0),
+          totalInvAge: ageKeys.reduce((sum,k) => sum + Number(row[k] || 0), 0),
+          shippedT30: Number(row['units-shipped-t30'] || 0),
+          recommendedAction: row['recommended-action'] || 'No Action'
+        }));
         this.filteredData = [...this.rawData];
         this.updateStats();
-        this.renderChart();
+        this.renderCharts();
         this.renderTable();
         this.renderPagination();
+        this.showLoader(false);
         alert(`✅ Processed ${this.rawData.length} products!`);
       },
-      error: (error) => {
-        console.error('CSV parsing error:', error);
-        alert('Error parsing CSV file. Please check the file format.');
-      }
+      error: (error) => { console.error(error); alert('Error parsing CSV.'); this.showLoader(false); }
     });
   }
-  
+
   updateStats() {
     const data = this.filteredData;
     const totalProducts = data.length;
-    const totalAvailable = data.reduce((sum, item) => sum + item.available, 0);
-    const totalPending = data.reduce((sum, item) => sum + item.pendingRemoval, 0);
-    const avgShipped = totalProducts > 0 
-      ? Math.round(data.reduce((sum, item) => sum + item.shippedT30, 0) / totalProducts) 
-      : 0;
-    const oldInventory = data.filter(item => item.totalInvAge > 365).length;
+    const totalAvailable = data.reduce((sum, i) => sum + i.available, 0);
+    const totalPending = data.reduce((sum, i) => sum + i.pendingRemoval, 0);
+    const avgShipped = totalProducts ? Math.round(data.reduce((sum,i)=>sum+i.shippedT30,0)/totalProducts) : 0;
+    const oldInventory = data.filter(i => i.totalInvAge > 365).length;
     
     document.getElementById('totalProducts').textContent = totalProducts.toLocaleString();
     document.getElementById('totalAvailable').textContent = totalAvailable.toLocaleString();
     document.getElementById('totalPending').textContent = totalPending.toLocaleString();
     document.getElementById('avgShipped').textContent = avgShipped.toLocaleString();
     document.getElementById('oldInventory').textContent = oldInventory.toLocaleString();
-  }
-  
-  renderChart() {
-    const chartContainer = document.getElementById('inventoryChart');
-    if (this.rawData.length === 0) {
-      chartContainer.innerHTML = '<div style="text-align:center; color:var(--gray);">Upload data to see inventory chart</div>';
-      return;
-    }
     
-    // Calculate age distribution
-    const ageGroups = {
-      '0-90': 0,
-      '91-180': 0,
-      '181-270': 0,
-      '271-365': 0,
-      '365+': 0
+    // Update sparklines and changes (simplified for demo)
+    this.renderSparklines();
+    this.updateChanges();
+  }
+
+  renderSparklines() {
+    // Generate mock sparkline data
+    const generateSparkline = (containerId, data) => {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      const maxValue = Math.max(...data, 1);
+      data.forEach(value => {
+        const height = (value / maxValue) * 100;
+        container.innerHTML += `<div class="spark-bar" style="height:${height}%"></div>`;
+      });
     };
     
-    this.rawData.forEach(item => {
-      if (item.totalInvAge <= 90) ageGroups['0-90']++;
-      else if (item.totalInvAge <= 180) ageGroups['91-180']++;
-      else if (item.totalInvAge <= 270) ageGroups['181-270']++;
-      else if (item.totalInvAge <= 365) ageGroups['271-365']++;
-      else ageGroups['365+']++;
-    });
-    
-    const maxValue = Math.max(...Object.values(ageGroups));
-    const bars = Object.entries(ageGroups).map(([label, value]) => {
-      const height = maxValue > 0 ? (value / maxValue) * 80 : 0;
-      return `
-        <div style="display:flex; flex-direction:column; align-items:center; flex:1; min-width:0;">
-          <div class="bar" style="height:${height}px; background:${label === '365+' ? 'var(--warning)' : 'var(--primary)'};"></div>
-          <div class="bar-label">${label}<br>${value}</div>
-        </div>
-      `;
-    });
-    
-    chartContainer.innerHTML = bars.join('');
+    generateSparkline('productsSparkline', [50, 60, 55, 70, 65, 80, 75]);
+    generateSparkline('inventorySparkline', [2000, 2200, 1900, 2100, 2300, 2150, 2250]);
+    generateSparkline('pendingSparkline', [10, 15, 12, 18, 16, 20, 22]);
+    generateSparkline('shippedSparkline', [5, 7, 6, 8, 9, 7, 8]);
+    generateSparkline('ageSparkline', [25, 30, 28, 35, 32, 40, 38]);
   }
-  
-  applyFilters() {
-    const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-    const conditionFilter = document.getElementById('conditionFilter').value;
-    const actionFilter = document.getElementById('actionFilter').value;
+
+  updateChanges() {
+    // Mock change percentages
+    document.getElementById('productsChange').textContent = '+2.3%';
+    document.getElementById('inventoryChange').textContent = '+5.1%';
+    document.getElementById('pendingChange').textContent = '+12.5%';
+    document.getElementById('shippedChange').textContent = '-1.8%';
+    document.getElementById('ageChange').textContent = '+8.2%';
+  }
+
+  renderCharts() {
+    if (!this.rawData.length) return;
     
+    // Destroy existing charts
+    Object.values(this.chartInstances).forEach(chart => chart.destroy());
+    
+    // Age distribution chart
+    const ageCtx = document.getElementById('ageChart').getContext('2d');
+    this.chartInstances.ageChart = new Chart(ageCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['0-90 days', '91-180 days', '181-270 days', '271-365 days', '365+ days'],
+        datasets: [{
+          data: this.getAgeDistribution(),
+          backgroundColor: ['#2ecc71', '#3498db', '#f39c12', '#e67e22', '#e74c3c']
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+    
+    // Top removals chart
+    const removalCtx = document.getElementById('removalChart').getContext('2d');
+    this.chartInstances.removalChart = new Chart(removalCtx, {
+      type: 'bar',
+      data: this.getTopRemovals(),
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+    
+    // Shipped units chart
+    const shippedCtx = document.getElementById('shippedChart').getContext('2d');
+    this.chartInstances.shippedChart = new Chart(shippedCtx, {
+      type: 'line',
+      data: this.getShippedDistribution(),
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  getAgeDistribution() {
+    const counts = [0, 0, 0, 0, 0];
+    this.rawData.forEach(item => {
+      if (item.totalInvAge <= 90) counts[0]++;
+      else if (item.totalInvAge <= 180) counts[1]++;
+      else if (item.totalInvAge <= 270) counts[2]++;
+      else if (item.totalInvAge <= 365) counts[3]++;
+      else counts[4]++;
+    });
+    return counts;
+  }
+
+  getTopRemovals() {
+    const removals = this.rawData
+      .filter(item => item.pendingRemoval > 0)
+      .sort((a, b) => b.pendingRemoval - a.pendingRemoval)
+      .slice(0, 5);
+    
+    return {
+      labels: removals.map(item => item.sku),
+      datasets: [{
+        data: removals.map(item => item.pendingRemoval),
+        backgroundColor: '#e74c3c'
+      }]
+    };
+  }
+
+  getShippedDistribution() {
+    const shippedData = this.rawData
+      .filter(item => item.shippedT30 > 0)
+      .sort((a, b) => b.shippedT30 - a.shippedT30)
+      .slice(0, 10);
+    
+    return {
+      labels: shippedData.map(item => item.sku),
+      datasets: [{
+        data: shippedData.map(item => item.shippedT30),
+        borderColor: '#3498db',
+        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+        tension: 0.4
+      }]
+    };
+  }
+
+  applyFilters() {
+    const term = document.getElementById('searchInput').value.trim().toLowerCase();
+    const cond = document.getElementById('conditionFilter').value.toLowerCase();
+    const act = document.getElementById('actionFilter').value.toLowerCase();
     this.filteredData = this.rawData.filter(item => {
-      const matchesSearch = 
-        item.sku.toLowerCase().includes(searchTerm) ||
-        item.asin.toLowerCase().includes(searchTerm) ||
-        item.name.toLowerCase().includes(searchTerm);
-      
-      const matchesCondition = conditionFilter === '' || item.condition === conditionFilter;
-      const matchesAction = actionFilter === '' || 
-        (actionFilter === 'removal' && item.recommendedAction.toLowerCase().includes('removal')) ||
-        (actionFilter === 'normal' && !item.recommendedAction.toLowerCase().includes('removal'));
-      
+      const matchesSearch = item.sku.toLowerCase().includes(term) || item.asin.toLowerCase().includes(term) || item.name.toLowerCase().includes(term);
+      const matchesCondition = !cond || item.condition.toLowerCase() === cond;
+      const matchesAction = !act || (act==='removal' && item.recommendedAction.toLowerCase().includes('removal')) || (act==='normal' && !item.recommendedAction.toLowerCase().includes('removal'));
       return matchesSearch && matchesCondition && matchesAction;
     });
-    
     this.currentPage = 1;
     this.updateStats();
     this.renderTable();
     this.renderPagination();
   }
-  
+
   resetFilters() {
     document.getElementById('searchInput').value = '';
     document.getElementById('conditionFilter').value = '';
     document.getElementById('actionFilter').value = '';
     this.applyFilters();
   }
-  
-  sortTable(column) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
-    
-    // Update sort indicators
-    document.querySelectorAll('th').forEach(th => {
-      th.classList.remove('sort-asc', 'sort-desc');
-    });
-    
-    const header = document.querySelector(`th[data-sort="${column}"]`);
-    header.classList.add(this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
-    
-    // Sort the data
-    this.filteredData.sort((a, b) => {
-      let valA = a[column];
-      let valB = b[column];
-      
-      // Handle numeric sorting dynamically
-      const isNumeric = !isNaN(Number(valA)) && !isNaN(Number(valB));
-      if (isNumeric) {
-        valA = Number(valA);
-        valB = Number(valB);
-      } else {
-        valA = String(valA).toLowerCase();
-        valB = String(valB).toLowerCase();
-      }
-      
-      if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
-      if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-    
-    this.renderTable();
-    this.renderPagination();
+
+  getRowClass(item) {
+    if(item.recommendedAction.toLowerCase().includes('removal')) return 'highlight';
+    if(item.totalInvAge > 365) return 'status-warning';
+    return '';
   }
-  
-  toggleColumn(column, visible) {
-    if (visible) {
-      this.visibleColumns.add(column);
-    } else {
-      this.visibleColumns.delete(column);
-    }
+
+  sortTable(col) {
+    if(this.sortColumn===col) this.sortDirection = this.sortDirection==='asc'?'desc':'asc';
+    else { this.sortColumn = col; this.sortDirection='asc'; }
+    document.querySelectorAll('th').forEach(th => th.classList.remove('sort-asc','sort-desc'));
+    document.querySelector(`th[data-sort="${col}"]`).classList.add(this.sortDirection==='asc'?'sort-asc':'sort-desc');
+    this.filteredData.sort((a,b)=>{
+      let va=a[col], vb=b[col];
+      if(['available','pendingRemoval','totalInvAge','shippedT30'].includes(col)){ va=Number(va); vb=Number(vb); } 
+      else { va=String(va).toLowerCase(); vb=String(vb).toLowerCase(); }
+      return (va<vb?-1:va>vb?1:0)*(this.sortDirection==='asc'?1:-1);
+    });
     this.renderTable();
   }
-  
+
   renderTable() {
     const tbody = document.getElementById('tableBody');
-    if (this.filteredData.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="9" class="empty-state">🔍 No products match your filters</td></tr>';
-      return;
-    }
-    
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    const pageData = this.filteredData.slice(start, end);
-    
-    // Build table headers based on visible columns
-    const headers = Array.from(this.visibleColumns);
-    const tableHeaders = headers.map(col => {
-      const headerMap = {
-        sku: 'SKU',
-        asin: 'ASIN',
-        name: 'Product Name',
-        condition: 'Condition',
-        available: 'Available',
-        pendingRemoval: 'Pending Removal',
-        totalInvAge: 'Total Inventory Age',
-        shippedT30: 'Units Shipped T30',
-        recommendedAction: 'Recommended Action'
-      };
-      return headerMap[col] || col;
-    });
-    
-    tbody.innerHTML = pageData.map(item => {
-      const needsAttention = item.recommendedAction.toLowerCase().includes('removal');
-      const hasOldInventory = item.totalInvAge > 365;
-      const rowClasses = [];
-      if (needsAttention) rowClasses.push('highlight');
-      if (hasOldInventory) rowClasses.push('status-warning');
-      if (needsAttention && hasOldInventory) rowClasses.push('status-both');
-      
-      return `
-        <tr class="${rowClasses.join(' ')}">
-          ${headers.includes('sku') ? `<td class="sku-cell">${item.sku}</td>` : ''}
-          ${headers.includes('asin') ? `<td class="asin-cell">${item.asin}</td>` : ''}
-          ${headers.includes('name') ? `<td>${item.name}</td>` : ''}
-          ${headers.includes('condition') ? `<td>${item.condition}</td>` : ''}
-          ${headers.includes('available') ? `<td>${item.available.toLocaleString()}</td>` : ''}
-          ${headers.includes('pendingRemoval') ? `<td>${item.pendingRemoval.toLocaleString()}</td>` : ''}
-          ${headers.includes('totalInvAge') ? `<td>${item.totalInvAge.toLocaleString()}</td>` : ''}
-          ${headers.includes('shippedT30') ? `<td>${item.shippedT30.toLocaleString()}</td>` : ''}
-          ${headers.includes('recommendedAction') ? `<td><span class="status-badge ${needsAttention ? 'status-recommendation' : hasOldInventory ? 'status-warning-badge' : 'status-normal'}">${item.recommendedAction}</span></td>` : ''}
-        </tr>
+    tbody.innerHTML='';
+    const start=this.itemsPerPage*(this.currentPage-1);
+    const end=start+this.itemsPerPage;
+    const pageData=this.filteredData.slice(start,end);
+    if(!pageData.length){ tbody.innerHTML='<tr><td colspan="9" class="empty-state">⚠️ No results found</td></tr>'; return; }
+    for(const item of pageData){
+      const tr=document.createElement('tr');
+      tr.className=this.getRowClass(item);
+      tr.innerHTML=`
+        <td class="sku-cell">${item.sku}</td>
+        <td class="asin-cell">${item.asin}</td>
+        <td>${item.name}</td>
+        <td>${item.condition}</td>
+        <td>${item.available}</td>
+        <td>${item.pendingRemoval}</td>
+        <td>${item.totalInvAge}</td>
+        <td>${item.shippedT30}</td>
+        <td>${item.recommendedAction}</td>
       `;
-    }).join('');
+      tbody.appendChild(tr);
+    }
   }
-  
+
   renderPagination() {
-    const totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
-    const container = document.getElementById('paginationContainer');
-    
-    if (totalPages <= 1) {
-      container.innerHTML = '';
-      return;
+    const container=document.getElementById('paginationContainer');
+    container.innerHTML='';
+    const totalPages=Math.ceil(this.filteredData.length/this.itemsPerPage);
+    for(let i=1;i<=totalPages;i++){
+      const btn=document.createElement('button');
+      btn.textContent=i;
+      btn.className='page-btn'+(i===this.currentPage?' active':'');
+      btn.addEventListener('click',()=>{this.currentPage=i; this.renderTable(); this.renderPagination();});
+      container.appendChild(btn);
     }
-    
-    let paginationHTML = '';
-    
-    // First page button
-    paginationHTML += `<button class="page-btn" onclick="dashboard.goToPage(1)" ${this.currentPage === 1 ? 'disabled' : ''}><<</button>`;
-    
-    // Previous button
-    paginationHTML += `<button class="page-btn" onclick="dashboard.goToPage(${this.currentPage > 1 ? this.currentPage - 1 : 1})" ${this.currentPage === 1 ? 'disabled' : ''}>←</button>`;
-    
-    // Page numbers
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= this.currentPage - 2 && i <= this.currentPage + 2)) {
-        paginationHTML += `<button class="page-btn ${i === this.currentPage ? 'active' : ''}" onclick="dashboard.goToPage(${i})">${i}</button>`;
-      } else if (i === this.currentPage - 3 || i === this.currentPage + 3) {
-        paginationHTML += '<span>...</span>';
-      }
-    }
-    
-    // Next button
-    paginationHTML += `<button class="page-btn" onclick="dashboard.goToPage(${this.currentPage < totalPages ? this.currentPage + 1 : totalPages})" ${this.currentPage === totalPages ? 'disabled' : ''}>→</button>`;
-    
-    // Last page button
-    paginationHTML += `<button class="page-btn" onclick="dashboard.goToPage(${totalPages})" ${this.currentPage === totalPages ? 'disabled' : ''}>>></button>`;
-    
-    container.innerHTML = paginationHTML;
   }
-  
-  goToPage(page) {
-    const totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
-    if (page < 1 || page > totalPages) return;
-    
-    this.currentPage = page;
-    this.renderTable();
-    this.renderPagination();
-  }
-  
+
   downloadCSV() {
-    if (this.filteredData.length === 0) {
-      alert("No data to download. Process a CSV first.");
-      return;
+    if(!this.filteredData.length) return alert("No data to export!");
+    const headers=Object.keys(this.filteredData[0]);
+    const csvContent=[headers.join(',')];
+    this.filteredData.forEach(row=>{ csvContent.push(headers.map(h=>`"${row[h]}"`).join(',')); });
+    const blob=new Blob([csvContent.join('\n')],{type:'text/csv;charset=utf-8;'});
+    const link=document.createElement('a');
+    link.href=URL.createObjectURL(blob);
+    link.download='wesbi_fba_snapshot.csv';
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  }
+
+  saveSnapshot() {
+    const name = prompt('Enter snapshot name:');
+    if (!name) return;
+    
+    this.snapshots[name] = {
+      data: this.rawData,
+      timestamp: new Date().toISOString(),
+      stats: {
+        totalProducts: this.rawData.length,
+        totalAvailable: this.rawData.reduce((sum, i) => sum + i.available, 0),
+        totalPending: this.rawData.reduce((sum, i) => sum + i.pendingRemoval, 0),
+        avgShipped: this.rawData.length ? Math.round(this.rawData.reduce((sum,i)=>sum+i.shippedT30,0)/this.rawData.length) : 0,
+        oldInventory: this.rawData.filter(i => i.totalInvAge > 365).length
+      }
+    };
+    
+    localStorage.setItem('wesbiSnapshots', JSON.stringify(this.snapshots));
+    this.updateSnapshotSelector();
+    alert(`Snapshot "${name}" saved!`);
+  }
+
+  updateSnapshotSelector() {
+    const select = document.getElementById('snapshotSelect');
+    select.innerHTML = '<option value="">Select a snapshot...</option>';
+    
+    Object.keys(this.snapshots).forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+  }
+
+  deleteSnapshot() {
+    const name = document.getElementById('snapshotSelect').value;
+    if (!name) return alert('Please select a snapshot to delete');
+    
+    if (confirm(`Delete snapshot "${name}"?`)) {
+      delete this.snapshots[name];
+      localStorage.setItem('wesbiSnapshots', JSON.stringify(this.snapshots));
+      this.updateSnapshotSelector();
+      alert(`Snapshot "${name}" deleted!`);
+    }
+  }
+
+  toggleCompareMode() {
+    const controls = document.getElementById('compareControls');
+    controls.style.display = controls.style.display === 'none' ? 'flex' : 'none';
+    
+    if (controls.style.display === 'flex') {
+      this.updateCompareSelectors();
+    }
+  }
+
+  updateCompareSelectors() {
+    const select1 = document.getElementById('compareSnapshot1');
+    const select2 = document.getElementById('compareSnapshot2');
+    
+    [select1, select2].forEach(select => {
+      select.innerHTML = '<option value="">Select snapshot...</option>';
+      Object.keys(this.snapshots).forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      });
+    });
+  }
+
+  runComparison() {
+    const snap1 = document.getElementById('compareSnapshot1').value;
+    const snap2 = document.getElementById('compareSnapshot2').value;
+    
+    if (!snap1 || !snap2) {
+      return alert('Please select two snapshots to compare');
     }
     
-    // Add metadata to CSV
-    const metadata = [
-      ['FBA Snapshot Export'],
-      ['Generated on:', new Date().toISOString()],
-      ['Filtered products:', this.filteredData.length],
-      ['']
-    ];
+    const data1 = this.snapshots[snap1].data;
+    const data2 = this.snapshots[snap2].data;
     
-    const csv = Papa.unparse([...metadata, ...this.filteredData]);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `fba_clean_snapshot_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Create comparison view
+    const comparisonData = this.compareSnapshots(data1, data2);
+    
+    // Show comparison results
+    alert(`Comparison complete!\n${snap1} vs ${snap2}\n\nProducts: ${data1.length} → ${data2.length}\nAvailable: ${data1.reduce((sum, i) => sum + i.available, 0)} → ${data2.reduce((sum, i) => sum + i.available, 0)}`);
+  }
+
+  compareSnapshots(data1, data2) {
+    // This would contain the actual comparison logic
+    // For now, just return the comparison data
+    return { data1, data2 };
+  }
+
+  closeComparison() {
+    document.getElementById('compareControls').style.display = 'none';
+  }
+
+  filterByCard(filterType) {
+    switch(filterType) {
+      case 'totalPending':
+        document.getElementById('actionFilter').value = 'removal';
+        this.applyFilters();
+        break;
+      case 'oldInventory':
+        // For now, just show a message
+        alert('Filtering by old inventory...');
+        break;
+      default:
+        // Reset filters for other cards
+        document.getElementById('actionFilter').value = '';
+        document.getElementById('conditionFilter').value = '';
+        this.applyFilters();
+    }
   }
 }
 
-// Initialize dashboard
-const dashboard = new FBADashboard();
-
-// Load saved column preferences
-window.addEventListener('load', () => {
-  const savedColumns = localStorage.getItem('fbaDashboardColumns');
-  if (savedColumns) {
-    const columns = JSON.parse(savedColumns);
-    document.querySelectorAll('.column-options input[type="checkbox"]').forEach(checkbox => {
-      checkbox.checked = columns.includes(checkbox.dataset.column);
-    });
-  }
-});
-
-// Save column preferences
-document.querySelectorAll('.column-options input[type="checkbox"]').forEach(checkbox => {
-  checkbox.addEventListener('change', () => {
-    const visibleColumns = Array.from(document.querySelectorAll('.column-options input[type="checkbox"]:checked'))
-      .map(input => input.dataset.column);
-    localStorage.setItem('fbaDashboardColumns', JSON.stringify(visibleColumns));
-  });
-});
+const dashboard = new WesBI();
 </script>
 </body>
 </html>
+
