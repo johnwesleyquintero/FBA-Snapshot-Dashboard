@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FBA Snapshot Dashboard v2.0</title>
+<title>FBA Snapshot Dashboard v2.1</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><polygon points='8,0 16,16 0,16' fill='%239c4dff'/></svg>">
 <style>
 :root {
@@ -154,6 +154,19 @@ th {
   position: sticky;
   top: 0;
   z-index: 10;
+  cursor: pointer;
+  user-select: none;
+}
+th:hover {
+  background: #e6e9f5;
+}
+th.sort-asc::after {
+  content: " ▲";
+  color: var(--primary);
+}
+th.sort-desc::after {
+  content: " ▼";
+  color: var(--primary);
 }
 th, td {
   padding: 14px 12px;
@@ -177,10 +190,19 @@ tr:hover {
   background-color: #fff8e1 !important;
   animation: pulse 2s infinite;
 }
+.status-warning {
+  background-color: #fff3cd !important;
+  animation: pulseWarning 3s infinite;
+}
 @keyframes pulse {
   0% { background-color: #fff8e1; }
   50% { background-color: #fff0c1; }
   100% { background-color: #fff8e1; }
+}
+@keyframes pulseWarning {
+  0% { background-color: #fff3cd; }
+  50% { background-color: #ffeaa7; }
+  100% { background-color: #fff3cd; }
 }
 .status-badge {
   display: inline-block;
@@ -197,9 +219,9 @@ tr:hover {
   background: #e8f5e9;
   color: var(--success);
 }
-.status-warning {
-  background: #fff3e0;
-  color: var(--warning);
+.status-warning-badge {
+  background: #fff3cd;
+  color: #856404;
 }
 .sku-cell {
   font-family: monospace;
@@ -280,7 +302,7 @@ tr:hover {
 <body>
 <div class="container">
   <div class="header">
-    <h1>🚀 FBA Snapshot Dashboard v2.0</h1>
+    <h1>🚀 FBA Snapshot Dashboard v2.1</h1>
     <p>Upload your FBA inventory report to get instant insights and recommendations</p>
   </div>
   
@@ -306,6 +328,7 @@ tr:hover {
         <option value="removal">Recommended Removal</option>
         <option value="normal">No Action</option>
       </select>
+      <button id="resetFilters" class="btn btn-secondary">Reset Filters</button>
     </div>
   </div>
   
@@ -326,21 +349,25 @@ tr:hover {
       <div class="stat-label">Avg. 30-Day Shipments</div>
       <div class="stat-value" id="avgShipped">0</div>
     </div>
+    <div class="stat-card">
+      <div class="stat-label">Old Inventory (365+ days)</div>
+      <div class="stat-value" id="oldInventory">0</div>
+    </div>
   </div>
   
   <div class="table-container">
     <table id="dashboardTable">
       <thead>
         <tr>
-          <th>SKU</th>
-          <th>ASIN</th>
-          <th>Product Name</th>
-          <th>Condition</th>
-          <th>Available</th>
-          <th>Pending Removal</th>
-          <th>Total Inventory Age</th>
-          <th>Units Shipped T30</th>
-          <th>Recommended Action</th>
+          <th data-sort="sku">SKU</th>
+          <th data-sort="asin">ASIN</th>
+          <th data-sort="name">Product Name</th>
+          <th data-sort="condition">Condition</th>
+          <th data-sort="available" class="numeric">Available</th>
+          <th data-sort="pendingRemoval" class="numeric">Pending Removal</th>
+          <th data-sort="totalInvAge" class="numeric">Total Inventory Age</th>
+          <th data-sort="shippedT30" class="numeric">Units Shipped T30</th>
+          <th data-sort="recommendedAction">Recommended Action</th>
         </tr>
       </thead>
       <tbody id="tableBody">
@@ -364,6 +391,8 @@ class FBADashboard {
     this.filteredData = [];
     this.currentPage = 1;
     this.itemsPerPage = 50;
+    this.sortColumn = null;
+    this.sortDirection = 'asc';
     this.init();
   }
   
@@ -373,6 +402,12 @@ class FBADashboard {
     document.getElementById('searchInput').addEventListener('input', () => this.applyFilters());
     document.getElementById('conditionFilter').addEventListener('change', () => this.applyFilters());
     document.getElementById('actionFilter').addEventListener('change', () => this.applyFilters());
+    document.getElementById('resetFilters').addEventListener('click', () => this.resetFilters());
+    
+    // Add event listeners for table headers
+    document.querySelectorAll('th[data-sort]').forEach(header => {
+      header.addEventListener('click', () => this.sortTable(header.dataset.sort));
+    });
   }
   
   processCSV() {
@@ -416,21 +451,24 @@ class FBADashboard {
   }
   
   updateStats() {
-    const totalProducts = this.rawData.length;
-    const totalAvailable = this.rawData.reduce((sum, item) => sum + item.available, 0);
-    const totalPending = this.rawData.reduce((sum, item) => sum + item.pendingRemoval, 0);
+    const data = this.filteredData;
+    const totalProducts = data.length;
+    const totalAvailable = data.reduce((sum, item) => sum + item.available, 0);
+    const totalPending = data.reduce((sum, item) => sum + item.pendingRemoval, 0);
     const avgShipped = totalProducts > 0 
-      ? Math.round(this.rawData.reduce((sum, item) => sum + item.shippedT30, 0) / totalProducts) 
+      ? Math.round(data.reduce((sum, item) => sum + item.shippedT30, 0) / totalProducts) 
       : 0;
+    const oldInventory = data.filter(item => item.totalInvAge > 365).length;
     
     document.getElementById('totalProducts').textContent = totalProducts.toLocaleString();
     document.getElementById('totalAvailable').textContent = totalAvailable.toLocaleString();
     document.getElementById('totalPending').textContent = totalPending.toLocaleString();
     document.getElementById('avgShipped').textContent = avgShipped.toLocaleString();
+    document.getElementById('oldInventory').textContent = oldInventory.toLocaleString();
   }
   
   applyFilters() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
     const conditionFilter = document.getElementById('conditionFilter').value;
     const actionFilter = document.getElementById('actionFilter').value;
     
@@ -449,6 +487,54 @@ class FBADashboard {
     });
     
     this.currentPage = 1;
+    this.updateStats();
+    this.renderTable();
+    this.renderPagination();
+  }
+  
+  resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('conditionFilter').value = '';
+    document.getElementById('actionFilter').value = '';
+    this.applyFilters();
+  }
+  
+  sortTable(column) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    
+    // Update sort indicators
+    document.querySelectorAll('th').forEach(th => {
+      th.classList.remove('sort-asc', 'sort-desc');
+    });
+    
+    const header = document.querySelector(`th[data-sort="${column}"]`);
+    header.classList.add(this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+    
+    // Sort the data
+    this.filteredData.sort((a, b) => {
+      let valA = a[column];
+      let valB = b[column];
+      
+      // Handle numeric sorting
+      if (column === 'available' || column === 'pendingRemoval' || 
+          column === 'totalInvAge' || column === 'shippedT30') {
+        valA = Number(valA);
+        valB = Number(valB);
+      } else {
+        valA = String(valA).toLowerCase();
+        valB = String(valB).toLowerCase();
+      }
+      
+      if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    
     this.renderTable();
     this.renderPagination();
   }
@@ -466,8 +552,11 @@ class FBADashboard {
     
     tbody.innerHTML = pageData.map(item => {
       const needsAttention = item.recommendedAction.toLowerCase().includes('removal');
+      const hasOldInventory = item.totalInvAge > 365;
+      const rowClass = needsAttention ? 'highlight' : hasOldInventory ? 'status-warning' : '';
+      
       return `
-        <tr class="${needsAttention ? 'highlight' : ''}">
+        <tr class="${rowClass}">
           <td class="sku-cell">${item.sku}</td>
           <td class="asin-cell">${item.asin}</td>
           <td>${item.name}</td>
@@ -477,7 +566,7 @@ class FBADashboard {
           <td>${item.totalInvAge.toLocaleString()}</td>
           <td>${item.shippedT30.toLocaleString()}</td>
           <td>
-            <span class="status-badge ${needsAttention ? 'status-recommendation' : 'status-normal'}">
+            <span class="status-badge ${needsAttention ? 'status-recommendation' : hasOldInventory ? 'status-warning-badge' : 'status-normal'}">
               ${item.recommendedAction}
             </span>
           </td>
