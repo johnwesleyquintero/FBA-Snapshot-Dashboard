@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WesBI - FBA Analytics Dashboard</title>
+<title>WesBI Beast Mode - FBA Intelligence Cockpit</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><polygon points='8,0 16,16 0,16' fill='%239c4dff'/></svg>">
 <style>
 :root {
@@ -21,22 +21,60 @@
   --bg: #f5f7fa;
   --shadow: 0 4px 20px rgba(0,0,0,0.08);
   --transition: all 0.3s ease;
+  --diff-green: #d4edda;
+  --diff-red: #f8d7da;
+  --diff-gray: #e2e3e5;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   background: var(--bg);
   color: var(--dark);
   line-height: 1.6;
   padding: 20px;
   min-height: 100vh;
 }
-.container { max-width: 1400px; margin: 0 auto; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; position: relative; }
-.header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 30px; text-align: center; }
-.header h1 { font-size: 2.5rem; margin-bottom: 10px; }
-.header p { font-size: 1.1rem; opacity: 0.9; max-width: 700px; margin: 0 auto; }
-.controls { padding: 25px 30px; background: var(--light); display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border-bottom: 1px solid var(--border); }
-.file-upload { display: flex; flex: 1; min-width: 250px; position: relative; }
+.container { 
+  max-width: 1400px; 
+  margin: 0 auto; 
+  background: var(--card-bg); 
+  border-radius: 16px; 
+  box-shadow: var(--shadow); 
+  overflow: hidden; 
+  position: relative; 
+}
+.header { 
+  background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+  color: white; 
+  padding: 30px; 
+  text-align: center; 
+}
+.header h1 { 
+  font-size: 2.5rem; 
+  margin-bottom: 10px; 
+  font-weight: 700;
+}
+.header p { 
+  font-size: 1.1rem; 
+  opacity: 0.9; 
+  max-width: 700px; 
+  margin: 0 auto; 
+}
+.controls { 
+  padding: 25px 30px; 
+  background: var(--light); 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 15px; 
+  align-items: center; 
+  border-bottom: 1px solid var(--border); 
+}
+.file-upload { 
+  display: flex; 
+  flex: 1; 
+  min-width: 250px; 
+  position: relative; 
+}
 .file-upload input[type="file"] { 
   flex: 1; 
   padding: 12px 12px 12px 120px; 
@@ -44,6 +82,7 @@ body {
   border-radius: 8px; 
   font-size: 1rem; 
   cursor: pointer;
+  background: white;
 }
 .file-upload input[type="file"]::file-selector-button {
   position: absolute;
@@ -57,178 +96,578 @@ body {
   padding: 0 16px;
   margin-right: 10px;
   cursor: pointer;
+  font-weight: 600;
 }
 .file-upload input[type="file"]:hover::file-selector-button {
   background: var(--primary-dark);
 }
-.btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; }
-.btn-primary { background: var(--primary); color: white; }
-.btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
-.btn-success { background: var(--success); color: white; }
-.btn-success:hover { background: #27ae60; }
-.btn-secondary { background: var(--secondary); color: white; }
-.btn-secondary:hover { background: #5a26d8; }
-.btn-compare { background: #3498db; color: white; }
-.btn-compare:hover { background: #2980b9; }
-.stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px 30px; background: var(--light); border-bottom: 1px solid var(--border); }
-.stat-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); position: relative; cursor: pointer; transition: var(--transition); }
-.stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
-.stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); margin: 10px 0; }
-.stat-label { font-size: 0.9rem; color: var(--gray); }
-.stat-change { font-size: 0.8rem; padding: 2px 8px; border-radius: 12px; margin-top: 5px; display: inline-block; }
-.change-up { background: #e8f7f0; color: var(--success); }
-.change-down { background: #fdecea; color: var(--danger); }
-.change-neutral { background: #f0f4f8; color: var(--gray); }
-.sparkline { height: 30px; margin-top: 10px; display: flex; align-items: end; gap: 1px; }
-.spark-bar { flex: 1; background: var(--primary); min-width: 2px; }
-.charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px 30px; background: var(--light); border-bottom: 1px solid var(--border); }
-.chart-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-.chart-title { font-size: 1rem; font-weight: 600; margin-bottom: 10px; color: var(--dark); }
-.chart-container { height: 200px; position: relative; }
-.table-container { padding: 20px; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; min-width: 1000px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-th { background: #f1f3f9; position: sticky; top: 0; z-index: 10; cursor: pointer; user-select: none; }
-th:hover { background: #e6e9f5; }
-th.sort-asc::after { content: " ▲"; color: var(--primary); }
-th.sort-desc::after { content: " ▼"; color: var(--primary); }
-th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-th { font-weight: 600; color: var(--dark); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
-tr:nth-child(even) { background-color: #fafbff; }
-tr:hover { background-color: #f0f4ff; }
-.highlight { background-color: #fff8e1 !important; animation: pulse 2s infinite; }
-.status-warning { background-color: #fff3cd !important; animation: pulseWarning 3s infinite; }
-@keyframes pulse { 0% { background-color: #fff8e1; } 50% { background-color: #fff0c1; } 100% { background-color: #fff8e1; } }
-@keyframes pulseWarning { 0% { background-color: #fff3cd; } 50% { background-color: #ffeaa7; } 100% { background-color: #fff3cd; } }
-.status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
-.status-recommendation { background: #ffebee; color: var(--danger); }
-.status-normal { background: #e8f5e9; color: var(--success); }
-.status-warning-badge { background: #fff3cd; color: #856404; }
-.sku-cell { font-family: monospace; font-weight: 600; color: var(--primary); }
-.asin-cell { font-family: monospace; color: var(--secondary); }
-.pagination { display: flex; justify-content: center; padding: 20px; gap: 10px; flex-wrap: wrap; }
-.page-btn { padding: 8px 14px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 6px; transition: var(--transition); }
-.page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-.page-btn:hover:not(.active) { background: #f0f0f0; }
-.search-box { flex: 1; min-width: 200px; padding: 12px 15px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; }
-.filter-controls { display: flex; gap: 10px; flex-wrap: wrap; }
-.empty-state { text-align: center; padding: 60px 20px; color: var(--gray); }
-.empty-state i { font-size: 3rem; margin-bottom: 20px; opacity: 0.3; }
-.loader-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); display:flex; justify-content:center; align-items:center; font-size:1.5rem; color: var(--primary); display:none; z-index:100; }
-.snapshot-selector { display: flex; gap: 10px; align-items: center; }
-.snapshot-selector select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); }
-.compare-controls { display: flex; gap: 10px; align-items: center; }
-.compare-controls select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); }
+.btn { 
+  padding: 12px 24px; 
+  border: none; 
+  border-radius: 8px; 
+  cursor: pointer; 
+  font-weight: 600; 
+  transition: var(--transition); 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 8px; 
+  white-space: nowrap;
+}
+.btn-primary { 
+  background: var(--primary); 
+  color: white; 
+}
+.btn-primary:hover { 
+  background: var(--primary-dark); 
+  transform: translateY(-2px); 
+}
+.btn-success { 
+  background: var(--success); 
+  color: white; 
+}
+.btn-success:hover { 
+  background: #27ae60; 
+}
+.btn-secondary { 
+  background: var(--secondary); 
+  color: white; 
+}
+.btn-secondary:hover { 
+  background: #5a26d8; 
+}
+.btn-compare { 
+  background: #3498db; 
+  color: white; 
+}
+.btn-compare:hover { 
+  background: #2980b9; 
+}
+.btn-alert { 
+  background: var(--danger); 
+  color: white; 
+}
+.btn-alert:hover { 
+  background: #c0392b; 
+}
+.stats-container { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+  gap: 20px; 
+  padding: 20px 30px; 
+  background: var(--light); 
+  border-bottom: 1px solid var(--border); 
+}
+.stat-card { 
+  background: white; 
+  border-radius: 12px; 
+  padding: 20px; 
+  text-align: center; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+  border-left: 4px solid var(--primary); 
+  position: relative; 
+  cursor: pointer; 
+  transition: var(--transition); 
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.stat-card:hover { 
+  transform: translateY(-3px); 
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1); 
+}
+.stat-value { 
+  font-size: 2rem; 
+  font-weight: 700; 
+  color: var(--primary); 
+  margin: 10px 0; 
+}
+.stat-label { 
+  font-size: 0.85rem; 
+  color: var(--gray); 
+  margin-bottom: 8px;
+}
+.stat-change { 
+  font-size: 0.8rem; 
+  padding: 2px 10px; 
+  border-radius: 15px; 
+  margin-top: 5px; 
+  display: inline-block; 
+  font-weight: 600;
+}
+.change-up { 
+  background: rgba(46, 204, 113, 0.2); 
+  color: var(--success); 
+}
+.change-down { 
+  background: rgba(231, 76, 60, 0.2); 
+  color: var(--danger); 
+}
+.change-neutral { 
+  background: rgba(108, 117, 125, 0.2); 
+  color: var(--gray); 
+}
+.sparkline { 
+  height: 30px; 
+  margin-top: 10px; 
+  display: flex; 
+  align-items: end; 
+  gap: 2px; 
+}
+.spark-bar { 
+  flex: 1; 
+  min-width: 3px; 
+  background: var(--primary);
+  border-radius: 2px 2px 0 0;
+}
+.spark-bar.up { background: var(--success); }
+.spark-bar.down { background: var(--danger); }
+.charts-container { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+  gap: 20px; 
+  padding: 20px 30px; 
+  background: var(--light); 
+  border-bottom: 1px solid var(--border); 
+}
+.chart-card { 
+  background: white; 
+  border-radius: 12px; 
+  padding: 15px; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+}
+.chart-title { 
+  font-size: 1rem; 
+  font-weight: 600; 
+  margin-bottom: 10px; 
+  color: var(--dark); 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chart-title .chart-actions {
+  display: flex;
+  gap: 8px;
+}
+.chart-container { 
+  height: 220px; 
+  position: relative; 
+}
+.table-container { 
+  padding: 20px; 
+  overflow-x: auto; 
+}
+table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  min-width: 1200px; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+}
+th, td { 
+  padding: 14px 12px; 
+  text-align: left; 
+  border-bottom: 1px solid var(--border); 
+  vertical-align: top;
+}
+th { 
+  background: #f1f3f9; 
+  position: sticky; 
+  top: 0; 
+  z-index: 10; 
+  cursor: pointer; 
+  user-select: none; 
+  font-weight: 600; 
+  color: var(--dark); 
+  text-transform: uppercase; 
+  font-size: 0.8rem; 
+  letter-spacing: 0.5px; 
+  line-height: 1.2;
+}
+th:hover { 
+  background: #e6e9f5; 
+}
+th.sort-asc::after { 
+  content: " ▲"; 
+  color: var(--primary); 
+}
+th.sort-desc::after { 
+  content: " ▼"; 
+  color: var(--primary); 
+}
+tr:nth-child(even) { 
+  background-color: #fafbff; 
+}
+tr:hover { 
+  background-color: #f0f4ff; 
+}
+.diff-increase { background-color: var(--diff-green) !important; }
+.diff-decrease { background-color: var(--diff-red) !important; }
+.diff-unchanged { background-color: var(--diff-gray) !important; }
+.highlight { 
+  background-color: #fff8e1 !important; 
+  animation: pulse 2s infinite; 
+}
+.status-warning { 
+  background-color: #fff3cd !important; 
+  animation: pulseWarning 3s infinite; 
+}
+.status-at-risk { 
+  background-color: #f8d7da !important; 
+  border-left: 4px solid var(--danger);
+}
+.status-hot { 
+  background-color: #d4edda !important; 
+  border-left: 4px solid var(--success);
+}
+@keyframes pulse { 
+  0% { background-color: #fff8e1; } 
+  50% { background-color: #fff0c1; } 
+  100% { background-color: #fff8e1; } 
+}
+@keyframes pulseWarning { 
+  0% { background-color: #fff3cd; } 
+  50% { background-color: #ffeaa7; } 
+  100% { background-color: #fff3cd; } 
+}
+.status-badge { 
+  display: inline-block; 
+  padding: 4px 10px; 
+  border-radius: 20px; 
+  font-size: 0.75rem; 
+  font-weight: 600; 
+}
+.status-recommendation { 
+  background: #ffebee; 
+  color: var(--danger); 
+}
+.status-normal { 
+  background: #e8f5e9; 
+  color: var(--success); 
+}
+.status-warning-badge { 
+  background: #fff3cd; 
+  color: #856404; 
+}
+.sku-cell { 
+  font-family: monospace; 
+  font-weight: 600; 
+  color: var(--primary); 
+  min-width: 120px;
+}
+.asin-cell { 
+  font-family: monospace; 
+  color: var(--secondary); 
+  min-width: 100px;
+}
+.product-cell { 
+  min-width: 200px;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+.numeric-cell {
+  text-align: right;
+  font-family: monospace;
+}
+.pagination { 
+  display: flex; 
+  justify-content: center; 
+  padding: 20px; 
+  gap: 10px; 
+  flex-wrap: wrap; 
+}
+.page-btn { 
+  padding: 8px 14px; 
+  border: 1px solid var(--border); 
+  background: white; 
+  cursor: pointer; 
+  border-radius: 6px; 
+  transition: var(--transition); 
+}
+.page-btn.active { 
+  background: var(--primary); 
+  color: white; 
+  border-color: var(--primary); 
+}
+.page-btn:hover:not(.active) { 
+  background: #f0f0f0; 
+}
+.search-box { 
+  flex: 1; 
+  min-width: 200px; 
+  padding: 12px 15px; 
+  border: 2px solid var(--border); 
+  border-radius: 8px; 
+  font-size: 1rem; 
+}
+.filter-controls { 
+  display: flex; 
+  gap: 10px; 
+  flex-wrap: wrap; 
+  align-items: center;
+}
+.advanced-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+.advanced-filters select, .advanced-filters input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 0.9rem;
+  min-width: 120px;
+}
+.empty-state { 
+  text-align: center; 
+  padding: 60px 20px; 
+  color: var(--gray); 
+}
+.empty-state i { 
+  font-size: 3rem; 
+  margin-bottom: 20px; 
+  opacity: 0.3; 
+}
+.loader-overlay { 
+  position: absolute; 
+  top:0; 
+  left:0; 
+  width:100%; 
+  height:100%; 
+  background:rgba(255,255,255,0.9); 
+  display:flex; 
+  justify-content:center; 
+  align-items:center; 
+  font-size:1.5rem; 
+  color: var(--primary); 
+  display:none; 
+  z-index:100; 
+  flex-direction: column;
+  gap: 15px;
+}
+.alert-banner {
+  background: linear-gradient(135deg, var(--warning), #e67e22);
+  color: white;
+  padding: 12px 20px;
+  text-align: center;
+  font-weight: 600;
+  animation: slideIn 0.5s ease;
+}
+@keyframes slideIn {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.insights-panel {
+  background: var(--light);
+  padding: 20px 30px;
+  border-bottom: 1px solid var(--border);
+}
+.insights-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: var(--dark);
+}
+.insight-item {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border-left: 3px solid var(--primary);
+}
+.insight-item.at-risk {
+  border-left-color: var(--danger);
+}
+.insight-item.hot {
+  border-left-color: var(--success);
+}
+.insight-item strong {
+  color: var(--primary);
+}
+.comparison-view {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  display: none;
+}
+.comparison-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.comparison-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
 @media (max-width: 768px) {
   .header h1 { font-size: 1.8rem; }
-  .controls { flex-direction: column; align-items: stretch; }
+  .controls, .advanced-filters { 
+    flex-direction: column; 
+    align-items: stretch; 
+  }
   .file-upload { width: 100%; }
   .btn { width: 100%; justify-content: center; }
+  .stats-container { grid-template-columns: 1fr; }
+  .charts-container { grid-template-columns: 1fr; }
+  .chart-container { height: 180px; }
+  th, td { padding: 10px 8px; font-size: 0.75rem; }
+  .product-cell { min-width: 150px; max-width: 200px; }
+  .numeric-cell { padding: 10px 6px; }
 }
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="loader-overlay" id="loader">⏳ Processing...</div>
+  <div class="loader-overlay" id="loader">
+    <div>⚡ Processing your data...</div>
+    <div id="loaderProgress">0%</div>
+  </div>
+  
   <div class="header">
-    <h1>🚀 WesBI - FBA Analytics Dashboard</h1>
-    <p>Advanced analytics for your Amazon inventory operations</p>
+    <h1>🦁 WesBI Beast Mode</h1>
+    <p>FBA Intelligence Cockpit - Real-time Amazon Ops Analytics</p>
+  </div>
+  
+  <div class="comparison-view" id="comparisonView">
+    <div class="comparison-title">📊 Snapshot Comparison Mode</div>
+    <div id="comparisonInfo">Comparing two snapshots</div>
+    <div class="comparison-actions">
+      <button id="exitComparisonBtn" class="btn btn-secondary">Exit Comparison</button>
+    </div>
   </div>
   
   <div class="controls">
     <div class="file-upload">
-      <input type="file" id="csvFile" accept=".csv" placeholder="Select CSV file">
+      <input type="file" id="csvFile" accept=".csv" multiple>
     </div>
-    <button id="processBtn" class="btn btn-primary">📊 Process Snapshot</button>
-    <button id="downloadBtn" class="btn btn-success">⬇️ Export Clean Data</button>
-    <button id="compareBtn" class="btn btn-compare">🔍 Compare Snapshots</button>
+    <button id="processBtn" class="btn btn-primary">🚀 Process Snapshots</button>
+    <button id="compareBtn" class="btn btn-compare">🔄 Compare Snapshots</button>
+    <button id="alertsBtn" class="btn btn-alert">🚨 View Alerts</button>
+    <button id="exportBtn" class="btn btn-success">📤 Export Data</button>
+  </div>
+  
+  <div class="controls">
     <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search by SKU, ASIN, or Product Name...">
     <div class="filter-controls">
-      <select id="conditionFilter" class="btn btn-secondary">
+      <select id="conditionFilter">
         <option value="">All Conditions</option>
         <option value="New">New</option>
         <option value="Used">Used</option>
       </select>
-      <select id="actionFilter" class="btn btn-secondary">
+      <select id="actionFilter">
         <option value="">All Actions</option>
         <option value="removal">Recommended Removal</option>
         <option value="normal">No Action</option>
       </select>
-      <button id="resetFilters" class="btn btn-secondary">Reset Filters</button>
+      <select id="ageFilter">
+        <option value="">All Age Brackets</option>
+        <option value="0-90">0-90 days</option>
+        <option value="91-180">91-180 days</option>
+        <option value="181-365">181-365 days</option>
+        <option value="365+">365+ days</option>
+      </select>
+      <button id="resetFilters" class="btn btn-secondary">Reset</button>
     </div>
   </div>
   
-  <div class="controls snapshot-selector">
-    <label for="snapshotSelect">Saved Snapshots:</label>
-    <select id="snapshotSelect">
-      <option value="">Select a snapshot...</option>
+  <div class="advanced-filters">
+    <select id="categoryFilter">
+      <option value="">All Categories</option>
     </select>
-    <button id="saveSnapshotBtn" class="btn btn-secondary">💾 Save Current</button>
-    <button id="deleteSnapshotBtn" class="btn btn-secondary">🗑️ Delete</button>
+    <input type="number" id="minStockFilter" placeholder="Min Stock" min="0">
+    <input type="number" id="maxStockFilter" placeholder="Max Stock" min="0">
+    <select id="stockStatusFilter">
+      <option value="">Stock Status</option>
+      <option value="low">Low Stock</option>
+      <option value="high">High Stock</option>
+      <option value="stranded">Stranded</option>
+    </select>
   </div>
   
-  <div class="controls compare-controls" style="display:none;" id="compareControls">
-    <label for="compareSnapshot1">Compare:</label>
-    <select id="compareSnapshot1">
-      <option value="">Select first snapshot...</option>
-    </select>
-    <label for="compareSnapshot2">vs</label>
-    <select id="compareSnapshot2">
-      <option value="">Select second snapshot...</option>
-    </select>
-    <button id="runCompareBtn" class="btn btn-compare">Run Comparison</button>
-    <button id="closeCompareBtn" class="btn btn-secondary">Close</button>
+  <div class="insights-panel" id="insightsPanel" style="display:none;">
+    <div class="insights-title">💡 AI-Powered Insights</div>
+    <div id="insightsContent"></div>
   </div>
   
   <div class="stats-container" id="statsContainer">
     <div class="stat-card" data-filter="totalProducts">
       <div class="stat-label">Total Products</div>
       <div class="stat-value" id="totalProducts">0</div>
-      <div class="stat-change change-neutral" id="productsChange">0%</div>
+      <div class="stat-change change-up" id="productsChange">+0%</div>
       <div class="sparkline" id="productsSparkline"></div>
     </div>
-    <div class="stat-card" data-filter="totalAvailable">
+    <div class="stat-card" data-filter="availableInventory">
       <div class="stat-label">Available Inventory</div>
-      <div class="stat-value" id="totalAvailable">0</div>
-      <div class="stat-change change-neutral" id="inventoryChange">0%</div>
+      <div class="stat-value" id="availableInventory">0</div>
+      <div class="stat-change change-up" id="inventoryChange">+0%</div>
       <div class="sparkline" id="inventorySparkline"></div>
     </div>
-    <div class="stat-card" data-filter="totalPending">
+    <div class="stat-card" data-filter="pendingRemovals">
       <div class="stat-label">Pending Removals</div>
-      <div class="stat-value" id="totalPending">0</div>
-      <div class="stat-change change-up" id="pendingChange">+0%</div>
+      <div class="stat-value" id="pendingRemovals">0</div>
+      <div class="stat-change change-down" id="pendingChange">-0%</div>
       <div class="sparkline" id="pendingSparkline"></div>
     </div>
-    <div class="stat-card" data-filter="avgShipped">
-      <div class="stat-label">Avg. 30-Day Shipments</div>
-      <div class="stat-value" id="avgShipped">0</div>
-      <div class="stat-change change-down" id="shippedChange">-0%</div>
-      <div class="sparkline" id="shippedSparkline"></div>
+    <div class="stat-card" data-filter="sellThroughRate">
+      <div class="stat-label">Sell-Through Rate</div>
+      <div class="stat-value" id="sellThroughRate">0%</div>
+      <div class="stat-change change-up" id="sellThroughChange">+0%</div>
+      <div class="sparkline" id="sellThroughSparkline"></div>
     </div>
-    <div class="stat-card" data-filter="oldInventory">
-      <div class="stat-label">Old Inventory (365+ days)</div>
-      <div class="stat-value" id="oldInventory">0</div>
-      <div class="stat-change change-up" id="ageChange">+0%</div>
-      <div class="sparkline" id="ageSparkline"></div>
+    <div class="stat-card" data-filter="avgDaysInventory">
+      <div class="stat-label">Avg Days in Inventory</div>
+      <div class="stat-value" id="avgDaysInventory">0</div>
+      <div class="stat-change change-down" id="daysChange">-0%</div>
+      <div class="sparkline" id="daysSparkline"></div>
+    </div>
+    <div class="stat-card" data-filter="atRiskSKUs">
+      <div class="stat-label">At-Risk SKUs</div>
+      <div class="stat-value" id="atRiskSKUs">0</div>
+      <div class="stat-change change-up" id="riskChange">+0%</div>
+      <div class="sparkline" id="riskSparkline"></div>
     </div>
   </div>
   
   <div class="charts-container" id="chartsContainer">
     <div class="chart-card">
-      <div class="chart-title">Inventory Age Distribution</div>
+      <div class="chart-title">
+        <span>Inventory Age Distribution</span>
+        <div class="chart-actions">
+          <button class="btn btn-secondary" data-chart="age">Export</button>
+        </div>
+      </div>
       <div class="chart-container">
         <canvas id="ageChart"></canvas>
       </div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Top Pending Removals</div>
+      <div class="chart-title">
+        <span>Top At-Risk SKUs</span>
+        <div class="chart-actions">
+          <button class="btn btn-secondary" data-chart="risk">Export</button>
+        </div>
+      </div>
       <div class="chart-container">
-        <canvas id="removalChart"></canvas>
+        <canvas id="riskChart"></canvas>
       </div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Shipped Units Distribution</div>
+      <div class="chart-title">
+        <span>Sell-Through Performance</span>
+        <div class="chart-actions">
+          <button class="btn btn-secondary" data-chart="performance">Export</button>
+        </div>
+      </div>
       <div class="chart-container">
-        <canvas id="shippedChart"></canvas>
+        <canvas id="performanceChart"></canvas>
       </div>
     </div>
   </div>
@@ -245,11 +684,20 @@ tr:hover { background-color: #f0f4ff; }
           <th data-sort="pendingRemoval" class="numeric">Pending Removal</th>
           <th data-sort="totalInvAge" class="numeric">Total Inventory Age</th>
           <th data-sort="shippedT30" class="numeric">Units Shipped T30</th>
+          <th data-sort="sellThroughRate" class="numeric">Sell-Through Rate</th>
           <th data-sort="recommendedAction">Recommended Action</th>
+          <th data-sort="riskScore">Risk Score</th>
         </tr>
       </thead>
       <tbody id="tableBody">
-        <tr><td colspan="9" class="empty-state">📁 Upload an FBA Snapshot CSV to get started</td></tr>
+        <tr>
+          <td colspan="11" class="empty-state">
+            <div>📁 Upload FBA Snapshot CSV files to get started</div>
+            <div style="margin-top: 10px; font-size: 0.9rem; color: var(--gray);">
+              Support for multiple files for comparison analysis
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -260,130 +708,304 @@ tr:hover { background-color: #f0f4ff; }
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
-class WesBI {
+class WesBIBeastMode {
   constructor() {
-    this.rawData = [];
+    this.snapshots = {};
+    this.currentData = [];
     this.filteredData = [];
+    this.comparisonMode = false;
+    this.comparisonData = null;
     this.currentPage = 1;
-    this.itemsPerPage = 50;
+    this.itemsPerPage = 30;
     this.sortColumn = null;
     this.sortDirection = 'asc';
-    this.snapshots = JSON.parse(localStorage.getItem('wesbiSnapshots') || '{}');
-    this.currentSnapshotName = null;
-    this.chartInstances = {};
+    this.alerts = [];
     this.init();
   }
   
   init() {
     this.loader = document.getElementById('loader');
-    document.getElementById('processBtn').addEventListener('click', () => this.processCSV());
-    document.getElementById('downloadBtn').addEventListener('click', () => this.downloadCSV());
+    document.getElementById('processBtn').addEventListener('click', () => this.processCSVs());
+    document.getElementById('compareBtn').addEventListener('click', () => this.toggleComparisonMode());
+    document.getElementById('alertsBtn').addEventListener('click', () => this.showAlerts());
+    document.getElementById('exportBtn').addEventListener('click', () => this.exportData());
+    document.getElementById('exitComparisonBtn').addEventListener('click', () => this.exitComparisonMode());
     document.getElementById('searchInput').addEventListener('input', () => this.applyFilters());
-    document.getElementById('conditionFilter').addEventListener('change', () => this.applyFilters());
-    document.getElementById('actionFilter').addEventListener('change', () => this.applyFilters());
     document.getElementById('resetFilters').addEventListener('click', () => this.resetFilters());
-    document.getElementById('saveSnapshotBtn').addEventListener('click', () => this.saveSnapshot());
-    document.getElementById('deleteSnapshotBtn').addEventListener('click', () => this.deleteSnapshot());
-    document.getElementById('compareBtn').addEventListener('click', () => this.toggleCompareMode());
-    document.getElementById('runCompareBtn').addEventListener('click', () => this.runComparison());
-    document.getElementById('closeCompareBtn').addEventListener('click', () => this.closeComparison());
+    document.querySelectorAll('.filter-controls select, .advanced-filters select, .advanced-filters input').forEach(el => {
+      el.addEventListener('change', () => this.applyFilters());
+    });
     document.querySelectorAll('th[data-sort]').forEach(th => {
       th.addEventListener('click', () => this.sortTable(th.dataset.sort));
     });
     document.querySelectorAll('.stat-card').forEach(card => {
       card.addEventListener('click', () => this.filterByCard(card.dataset.filter));
     });
-    
-    this.updateSnapshotSelector();
-  }
-
-  showLoader(show) { this.loader.style.display = show ? 'flex' : 'none'; }
-
-  processCSV() {
-    const file = document.getElementById('csvFile').files[0];
-    if (!file) return alert("Please select a CSV file first!");
-    this.showLoader(true);
-    
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const ageKeys = ['inv-age-0-to-90-days','inv-age-91-to-180-days','inv-age-181-to-270-days','inv-age-271-to-365-days','inv-age-365-plus-days'];
-        this.rawData = results.data.map(row => ({
-          sku: row['sku'] || '',
-          asin: row['asin'] || '',
-          name: row['product-name'] || '',
-          condition: row['condition'] || '',
-          available: Number(row['available'] || 0),
-          pendingRemoval: Number(row['pending-removal-quantity'] || 0),
-          totalInvAge: ageKeys.reduce((sum,k) => sum + Number(row[k] || 0), 0),
-          shippedT30: Number(row['units-shipped-t30'] || 0),
-          recommendedAction: row['recommended-action'] || 'No Action'
-        }));
-        this.filteredData = [...this.rawData];
-        this.updateStats();
-        this.renderCharts();
-        this.renderTable();
-        this.renderPagination();
-        this.showLoader(false);
-        alert(`✅ Processed ${this.rawData.length} products!`);
-      },
-      error: (error) => { console.error(error); alert('Error parsing CSV.'); this.showLoader(false); }
+    document.querySelectorAll('[data-chart]').forEach(btn => {
+      btn.addEventListener('click', (e) => this.exportChart(e.target.dataset.chart));
     });
   }
 
-  updateStats() {
-    const data = this.filteredData;
+  showLoader(show, message = "Processing...") {
+    const loader = document.getElementById('loader');
+    loader.querySelector('div:first-child').textContent = message;
+    loader.style.display = show ? 'flex' : 'none';
+  }
+
+  updateProgress(percent) {
+    document.getElementById('loaderProgress').textContent = `${percent}%`;
+  }
+
+  async processCSVs() {
+    const files = document.getElementById('csvFile').files;
+    if (files.length === 0) return alert("Please select CSV file(s) first!");
+    
+    this.showLoader(true, "Processing your FBA snapshots...");
+    this.updateProgress(0);
+    
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileName = file.name.replace('.csv', '');
+        this.updateProgress(Math.round((i / files.length) * 100));
+        
+        await new Promise((resolve, reject) => {
+          Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+              const ageKeys = ['inv-age-0-to-90-days','inv-age-91-to-180-days','inv-age-181-to-270-days','inv-age-271-to-365-days','inv-age-365-plus-days'];
+              const processedData = results.data.map(row => {
+                const totalInvAge = ageKeys.reduce((sum,k) => sum + Number(row[k] || 0), 0);
+                const available = Number(row['available'] || 0);
+                const shippedT30 = Number(row['units-shipped-t30'] || 0);
+                const sellThroughRate = available > 0 ? Math.round((shippedT30 / (available + shippedT30)) * 100) : 0;
+                const riskScore = this.calculateRiskScore(available, totalInvAge, shippedT30);
+                
+                return {
+                  sku: row['sku'] || '',
+                  asin: row['asin'] || '',
+                  name: row['product-name'] || '',
+                  condition: row['condition'] || '',
+                  available: available,
+                  pendingRemoval: Number(row['pending-removal-quantity'] || 0),
+                  totalInvAge: totalInvAge,
+                  shippedT30: shippedT30,
+                  sellThroughRate: sellThroughRate,
+                  recommendedAction: row['recommended-action'] || 'No Action',
+                  riskScore: riskScore,
+                  category: row['category'] || 'Unknown',
+                  timestamp: new Date().toISOString()
+                };
+              });
+              
+              this.snapshots[fileName] = {
+                data: processedData,
+                timestamp: new Date().toISOString(),
+                stats: this.calculateStats(processedData)
+              };
+              resolve();
+            },
+            error: (error) => {
+              console.error('CSV parsing error:', error);
+              reject(error);
+            }
+          });
+        });
+      }
+      
+      // Set current data to the most recent snapshot
+      const snapshotNames = Object.keys(this.snapshots);
+      if (snapshotNames.length > 0) {
+        const latestSnapshot = snapshotNames[snapshotNames.length - 1];
+        this.currentData = [...this.snapshots[latestSnapshot].data];
+        this.filteredData = [...this.currentData];
+        this.generateAlerts();
+        this.updateUI();
+        this.showLoader(false);
+        alert(`✅ Processed ${snapshotNames.length} snapshot(s) with ${this.currentData.length} total products!`);
+      }
+    } catch (error) {
+      console.error('Error processing CSVs:', error);
+      alert('Error processing CSV files. Please check the file format.');
+      this.showLoader(false);
+    }
+  }
+
+  calculateStats(data) {
     const totalProducts = data.length;
     const totalAvailable = data.reduce((sum, i) => sum + i.available, 0);
     const totalPending = data.reduce((sum, i) => sum + i.pendingRemoval, 0);
-    const avgShipped = totalProducts ? Math.round(data.reduce((sum,i)=>sum+i.shippedT30,0)/totalProducts) : 0;
-    const oldInventory = data.filter(i => i.totalInvAge > 365).length;
+    const totalShipped = data.reduce((sum, i) => sum + i.shippedT30, 0);
+    const avgDaysInventory = totalProducts > 0 ? Math.round(data.reduce((sum, i) => sum + i.totalInvAge, 0) / totalProducts) : 0;
+    const sellThroughRate = totalAvailable + totalShipped > 0 ? Math.round((totalShipped / (totalAvailable + totalShipped)) * 100) : 0;
+    const atRiskSKUs = data.filter(i => i.riskScore > 70).length;
     
-    document.getElementById('totalProducts').textContent = totalProducts.toLocaleString();
-    document.getElementById('totalAvailable').textContent = totalAvailable.toLocaleString();
-    document.getElementById('totalPending').textContent = totalPending.toLocaleString();
-    document.getElementById('avgShipped').textContent = avgShipped.toLocaleString();
-    document.getElementById('oldInventory').textContent = oldInventory.toLocaleString();
+    return {
+      totalProducts,
+      totalAvailable,
+      totalPending,
+      totalShipped,
+      avgDaysInventory,
+      sellThroughRate,
+      atRiskSKUs
+    };
+  }
+
+  calculateRiskScore(available, totalInvAge, shippedT30) {
+    let score = 0;
     
-    // Update sparklines and changes (simplified for demo)
+    // High inventory age increases risk
+    if (totalInvAge > 365) score += 40;
+    else if (totalInvAge > 180) score += 25;
+    else if (totalInvAge > 90) score += 10;
+    
+    // Low sell-through increases risk
+    const sellThroughRate = available + shippedT30 > 0 ? (shippedT30 / (available + shippedT30)) * 100 : 0;
+    if (sellThroughRate < 10) score += 30;
+    else if (sellThroughRate < 25) score += 20;
+    else if (sellThroughRate < 50) score += 10;
+    
+    // High pending removals increase risk
+    if (this.pendingRemoval > 10) score += 20;
+    else if (this.pendingRemoval > 5) score += 10;
+    
+    // Low available stock with high demand could be risk (stockout)
+    if (available < 5 && shippedT30 > 20) score += 15;
+    
+    return Math.min(score, 100);
+  }
+
+  generateAlerts() {
+    this.alerts = [];
+    
+    // Find at-risk SKUs
+    const atRiskSKUs = this.currentData.filter(item => item.riskScore > 70);
+    atRiskSKUs.slice(0, 5).forEach(sku => {
+      this.alerts.push({
+        type: 'at-risk',
+        message: `⚠️ SKU ${sku.sku} is at high risk (Score: ${sku.riskScore}). Consider removal or promotional action.`,
+        sku: sku.sku
+      });
+    });
+    
+    // Find hot SKUs
+    const hotSKUs = this.currentData.filter(item => 
+      item.sellThroughRate > 70 && item.available > 0 && item.totalInvAge < 90
+    );
+    hotSKUs.slice(0, 3).forEach(sku => {
+      this.alerts.push({
+        type: 'hot',
+        message: `🔥 SKU ${sku.sku} is trending hot! Sell-through rate: ${sku.sellThroughRate}%. Consider restocking.`,
+        sku: sku.sku
+      });
+    });
+    
+    // Low stock alerts
+    const lowStock = this.currentData.filter(item => item.available < 10 && item.shippedT30 > 5);
+    lowStock.slice(0, 3).forEach(sku => {
+      this.alerts.push({
+        type: 'low-stock',
+        message: `📊 SKU ${sku.sku} has low stock (${sku.available} units) with high demand (${sku.shippedT30} units shipped). Restock needed!`,
+        sku: sku.sku
+      });
+    });
+    
+    this.updateInsightsPanel();
+  }
+
+  updateInsightsPanel() {
+    const panel = document.getElementById('insightsPanel');
+    const content = document.getElementById('insightsContent');
+    
+    if (this.alerts.length > 0) {
+      content.innerHTML = this.alerts.map(alert => {
+        const className = alert.type === 'at-risk' ? 'at-risk' : alert.type === 'hot' ? 'hot' : '';
+        return `<div class="insight-item ${className}">${alert.message}</div>`;
+      }).join('');
+      panel.style.display = 'block';
+    } else {
+      panel.style.display = 'none';
+    }
+  }
+
+  updateUI() {
+    this.updateStats();
+    this.renderCharts();
+    this.renderTable();
+    this.renderPagination();
+  }
+
+  updateStats() {
+    if (this.filteredData.length === 0) {
+      // Reset all stats to 0
+      document.getElementById('totalProducts').textContent = '0';
+      document.getElementById('availableInventory').textContent = '0';
+      document.getElementById('pendingRemovals').textContent = '0';
+      document.getElementById('sellThroughRate').textContent = '0%';
+      document.getElementById('avgDaysInventory').textContent = '0';
+      document.getElementById('atRiskSKUs').textContent = '0';
+      return;
+    }
+    
+    const stats = this.calculateStats(this.filteredData);
+    
+    document.getElementById('totalProducts').textContent = stats.totalProducts.toLocaleString();
+    document.getElementById('availableInventory').textContent = stats.totalAvailable.toLocaleString();
+    document.getElementById('pendingRemovals').textContent = stats.totalPending.toLocaleString();
+    document.getElementById('sellThroughRate').textContent = `${stats.sellThroughRate}%`;
+    document.getElementById('avgDaysInventory').textContent = stats.avgDaysInventory;
+    document.getElementById('atRiskSKUs').textContent = stats.atRiskSKUs;
+    
+    // Mock changes (in real implementation, compare with previous snapshot)
+    document.getElementById('productsChange').textContent = '+2.3%';
+    document.getElementById('inventoryChange').textContent = '+5.1%';
+    document.getElementById('pendingChange').textContent = '-12.5%';
+    document.getElementById('sellThroughChange').textContent = '+8.2%';
+    document.getElementById('daysChange').textContent = '-3.1%';
+    document.getElementById('riskChange').textContent = '-5.4%';
+    
     this.renderSparklines();
-    this.updateChanges();
   }
 
   renderSparklines() {
-    // Generate mock sparkline data
-    const generateSparkline = (containerId, data) => {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      const maxValue = Math.max(...data, 1);
-      data.forEach(value => {
-        const height = (value / maxValue) * 100;
-        container.innerHTML += `<div class="spark-bar" style="height:${height}%"></div>`;
-      });
+    const sparklineData = {
+      products: [45, 52, 48, 60, 58, 65, 70],
+      inventory: [1800, 2100, 1950, 2200, 2400, 2300, 2500],
+      pending: [45, 38, 42, 35, 30, 28, 25],
+      sellThrough: [65, 68, 70, 72, 75, 78, 80],
+      days: [120, 115, 118, 110, 105, 102, 98],
+      risk: [25, 28, 24, 22, 20, 18, 15]
     };
     
-    generateSparkline('productsSparkline', [50, 60, 55, 70, 65, 80, 75]);
-    generateSparkline('inventorySparkline', [2000, 2200, 1900, 2100, 2300, 2150, 2250]);
-    generateSparkline('pendingSparkline', [10, 15, 12, 18, 16, 20, 22]);
-    generateSparkline('shippedSparkline', [5, 7, 6, 8, 9, 7, 8]);
-    generateSparkline('ageSparkline', [25, 30, 28, 35, 32, 40, 38]);
-  }
-
-  updateChanges() {
-    // Mock change percentages
-    document.getElementById('productsChange').textContent = '+2.3%';
-    document.getElementById('inventoryChange').textContent = '+5.1%';
-    document.getElementById('pendingChange').textContent = '+12.5%';
-    document.getElementById('shippedChange').textContent = '-1.8%';
-    document.getElementById('ageChange').textContent = '+8.2%';
+    Object.entries(sparklineData).forEach(([key, data]) => {
+      const container = document.getElementById(`${key}Sparkline`);
+      if (!container) return;
+      
+      container.innerHTML = '';
+      const maxValue = Math.max(...data);
+      const minValue = Math.min(...data);
+      
+      data.forEach((value, index) => {
+        const height = ((value - minValue) / (maxValue - minValue)) * 100;
+        const isUp = index > 0 && value > data[index - 1];
+        const isDown = index > 0 && value < data[index - 1];
+        const barClass = isUp ? 'up' : isDown ? 'down' : '';
+        container.innerHTML += `<div class="spark-bar ${barClass}" style="height:${Math.max(height, 5)}%"></div>`;
+      });
+    });
   }
 
   renderCharts() {
-    if (!this.rawData.length) return;
-    
     // Destroy existing charts
-    Object.values(this.chartInstances).forEach(chart => chart.destroy());
+    if (this.chartInstances) {
+      Object.values(this.chartInstances).forEach(chart => {
+        if (chart && typeof chart.destroy === 'function') chart.destroy();
+      });
+    }
+    this.chartInstances = {};
+    
+    if (this.currentData.length === 0) return;
     
     // Age distribution chart
     const ageCtx = document.getElementById('ageChart').getContext('2d');
@@ -393,48 +1015,88 @@ class WesBI {
         labels: ['0-90 days', '91-180 days', '181-270 days', '271-365 days', '365+ days'],
         datasets: [{
           data: this.getAgeDistribution(),
-          backgroundColor: ['#2ecc71', '#3498db', '#f39c12', '#e67e22', '#e74c3c']
+          backgroundColor: ['#2ecc71', '#3498db', '#f39c12', '#e67e22', '#e74c3c'],
+          borderWidth: 0
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom' }
+          legend: { position: 'bottom', labels: { padding: 15 } },
+          tooltip: {
+            callbacks: {
+              label: (context) => `${context.label}: ${context.raw} products (${((context.raw / context.dataset.data.reduce((a,b) => a + b, 0)) * 100).toFixed(1)}%)`
+            }
+          }
         }
       }
     });
     
-    // Top removals chart
-    const removalCtx = document.getElementById('removalChart').getContext('2d');
-    this.chartInstances.removalChart = new Chart(removalCtx, {
+    // Top at-risk SKUs chart
+    const riskData = this.getTopAtRiskSKUs();
+    const riskCtx = document.getElementById('riskChart').getContext('2d');
+    this.chartInstances.riskChart = new Chart(riskCtx, {
       type: 'bar',
-      data: this.getTopRemovals(),
+      data: {
+        labels: riskData.labels,
+        datasets: [{
+          data: riskData.values,
+          backgroundColor: '#e74c3c',
+          borderWidth: 0
+        }]
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => `Risk Score: ${context.raw}`
+            }
+          }
         },
         scales: {
-          y: { beginAtZero: true }
+          y: { 
+            beginAtZero: true,
+            max: 100,
+            ticks: { stepSize: 20 }
+          }
         }
       }
     });
     
-    // Shipped units chart
-    const shippedCtx = document.getElementById('shippedChart').getContext('2d');
-    this.chartInstances.shippedChart = new Chart(shippedCtx, {
-      type: 'line',
-      data: this.getShippedDistribution(),
+    // Sell-through performance chart
+    const perfData = this.getSellThroughDistribution();
+    const perfCtx = document.getElementById('performanceChart').getContext('2d');
+    this.chartInstances.performanceChart = new Chart(perfCtx, {
+      type: 'bar',
+      data: {
+        labels: perfData.labels,
+        datasets: [{
+          data: perfData.values,
+          backgroundColor: perfData.colors,
+          borderWidth: 0
+        }]
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => `Sell-Through: ${context.raw}%`
+            }
+          }
         },
         scales: {
-          y: { beginAtZero: true }
+          y: { 
+            beginAtZero: true,
+            max: 100,
+            ticks: { stepSize: 25 }
+          }
         }
       }
     });
@@ -442,7 +1104,7 @@ class WesBI {
 
   getAgeDistribution() {
     const counts = [0, 0, 0, 0, 0];
-    this.rawData.forEach(item => {
+    this.currentData.forEach(item => {
       if (item.totalInvAge <= 90) counts[0]++;
       else if (item.totalInvAge <= 180) counts[1]++;
       else if (item.totalInvAge <= 270) counts[2]++;
@@ -452,48 +1114,92 @@ class WesBI {
     return counts;
   }
 
-  getTopRemovals() {
-    const removals = this.rawData
-      .filter(item => item.pendingRemoval > 0)
-      .sort((a, b) => b.pendingRemoval - a.pendingRemoval)
-      .slice(0, 5);
+  getTopAtRiskSKUs() {
+    const atRisk = this.currentData
+      .filter(item => item.riskScore > 50)
+      .sort((a, b) => b.riskScore - a.riskScore)
+      .slice(0, 8);
     
     return {
-      labels: removals.map(item => item.sku),
-      datasets: [{
-        data: removals.map(item => item.pendingRemoval),
-        backgroundColor: '#e74c3c'
-      }]
+      labels: atRisk.map(item => item.sku.length > 8 ? item.sku.substring(0, 8) + '...' : item.sku),
+      values: atRisk.map(item => item.riskScore)
     };
   }
 
-  getShippedDistribution() {
-    const shippedData = this.rawData
-      .filter(item => item.shippedT30 > 0)
-      .sort((a, b) => b.shippedT30 - a.shippedT30)
+  getSellThroughDistribution() {
+    const sorted = this.currentData
+      .filter(item => item.sellThroughRate > 0)
+      .sort((a, b) => b.sellThroughRate - a.sellThroughRate)
       .slice(0, 10);
     
     return {
-      labels: shippedData.map(item => item.sku),
-      datasets: [{
-        data: shippedData.map(item => item.shippedT30),
-        borderColor: '#3498db',
-        backgroundColor: 'rgba(52, 152, 219, 0.1)',
-        tension: 0.4
-      }]
+      labels: sorted.map(item => item.sku.length > 8 ? item.sku.substring(0, 8) + '...' : item.sku),
+      values: sorted.map(item => item.sellThroughRate),
+      colors: sorted.map(item => {
+        if (item.sellThroughRate >= 70) return '#2ecc71';
+        else if (item.sellThroughRate >= 50) return '#f39c12';
+        else return '#e74c3c';
+      })
     };
   }
 
   applyFilters() {
-    const term = document.getElementById('searchInput').value.trim().toLowerCase();
-    const cond = document.getElementById('conditionFilter').value.toLowerCase();
-    const act = document.getElementById('actionFilter').value.toLowerCase();
-    this.filteredData = this.rawData.filter(item => {
-      const matchesSearch = item.sku.toLowerCase().includes(term) || item.asin.toLowerCase().includes(term) || item.name.toLowerCase().includes(term);
-      const matchesCondition = !cond || item.condition.toLowerCase() === cond;
-      const matchesAction = !act || (act==='removal' && item.recommendedAction.toLowerCase().includes('removal')) || (act==='normal' && !item.recommendedAction.toLowerCase().includes('removal'));
-      return matchesSearch && matchesCondition && matchesAction;
+    const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+    const condition = document.getElementById('conditionFilter').value;
+    const action = document.getElementById('actionFilter').value;
+    const ageBracket = document.getElementById('ageFilter').value;
+    const category = document.getElementById('categoryFilter').value;
+    const minStock = document.getElementById('minStockFilter').value;
+    const maxStock = document.getElementById('maxStockFilter').value;
+    const stockStatus = document.getElementById('stockStatusFilter').value;
+    
+    this.filteredData = this.currentData.filter(item => {
+      // Search filter
+      const matchesSearch = !searchTerm || 
+        item.sku.toLowerCase().includes(searchTerm) ||
+        item.asin.toLowerCase().includes(searchTerm) ||
+        item.name.toLowerCase().includes(searchTerm);
+      
+      // Condition filter
+      const matchesCondition = !condition || item.condition === condition;
+      
+      // Action filter
+      const matchesAction = !action || 
+        (action === 'removal' && item.recommendedAction.toLowerCase().includes('removal')) ||
+        (action === 'normal' && !item.recommendedAction.toLowerCase().includes('removal'));
+      
+      // Age bracket filter
+      let matchesAge = true;
+      if (ageBracket) {
+        switch(ageBracket) {
+          case '0-90': matchesAge = item.totalInvAge <= 90; break;
+          case '91-180': matchesAge = item.totalInvAge > 90 && item.totalInvAge <= 180; break;
+          case '181-365': matchesAge = item.totalInvAge > 180 && item.totalInvAge <= 365; break;
+          case '365+': matchesAge = item.totalInvAge > 365; break;
+        }
+      }
+      
+      // Category filter
+      const matchesCategory = !category || item.category === category;
+      
+      // Stock filters
+      const matchesMinStock = !minStock || item.available >= parseInt(minStock);
+      const matchesMaxStock = !maxStock || item.available <= parseInt(maxStock);
+      
+      // Stock status filter
+      let matchesStockStatus = true;
+      if (stockStatus) {
+        switch(stockStatus) {
+          case 'low': matchesStockStatus = item.available < 10 && item.shippedT30 > 0; break;
+          case 'high': matchesStockStatus = item.available > 100 && item.shippedT30 < 5; break;
+          case 'stranded': matchesStockStatus = item.available > 10 && item.shippedT30 === 0; break;
+        }
+      }
+      
+      return matchesSearch && matchesCondition && matchesAction && matchesAge && 
+             matchesCategory && matchesMinStock && matchesMaxStock && matchesStockStatus;
     });
+    
     this.currentPage = 1;
     this.updateStats();
     this.renderTable();
@@ -504,197 +1210,337 @@ class WesBI {
     document.getElementById('searchInput').value = '';
     document.getElementById('conditionFilter').value = '';
     document.getElementById('actionFilter').value = '';
+    document.getElementById('ageFilter').value = '';
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('minStockFilter').value = '';
+    document.getElementById('maxStockFilter').value = '';
+    document.getElementById('stockStatusFilter').value = '';
     this.applyFilters();
   }
 
   getRowClass(item) {
-    if(item.recommendedAction.toLowerCase().includes('removal')) return 'highlight';
-    if(item.totalInvAge > 365) return 'status-warning';
-    return '';
+    if (this.comparisonMode && this.comparisonData) {
+      // Handle comparison mode row classes
+      return this.getComparisonRowClass(item);
+    }
+    
+    const classes = [];
+    if (item.recommendedAction.toLowerCase().includes('removal')) classes.push('highlight');
+    if (item.totalInvAge > 365) classes.push('status-warning');
+    if (item.riskScore > 70) classes.push('status-at-risk');
+    if (item.sellThroughRate > 70 && item.available > 0) classes.push('status-hot');
+    return classes.join(' ');
   }
 
-  sortTable(col) {
-    if(this.sortColumn===col) this.sortDirection = this.sortDirection==='asc'?'desc':'asc';
-    else { this.sortColumn = col; this.sortDirection='asc'; }
-    document.querySelectorAll('th').forEach(th => th.classList.remove('sort-asc','sort-desc'));
-    document.querySelector(`th[data-sort="${col}"]`).classList.add(this.sortDirection==='asc'?'sort-asc':'sort-desc');
-    this.filteredData.sort((a,b)=>{
-      let va=a[col], vb=b[col];
-      if(['available','pendingRemoval','totalInvAge','shippedT30'].includes(col)){ va=Number(va); vb=Number(vb); } 
-      else { va=String(va).toLowerCase(); vb=String(vb).toLowerCase(); }
-      return (va<vb?-1:va>vb?1:0)*(this.sortDirection==='asc'?1:-1);
+  getComparisonRowClass(item) {
+    // In comparison mode, check differences between snapshots
+    const classes = [];
+    
+    // This would compare with the other snapshot
+    // For demo, showing static logic
+    if (item.available > 50) classes.push('diff-increase');
+    else if (item.available < 10) classes.push('diff-decrease');
+    else classes.push('diff-unchanged');
+    
+    return classes.join(' ');
+  }
+
+  sortTable(column) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    
+    // Reset sort indicators
+    document.querySelectorAll('th').forEach(th => {
+      th.classList.remove('sort-asc', 'sort-desc');
     });
+    
+    // Set current sort indicator
+    const header = document.querySelector(`th[data-sort="${column}"]`);
+    if (header) {
+      header.classList.add(this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+    }
+    
+    // Sort the data
+    this.filteredData.sort((a, b) => {
+      let valA = a[column];
+      let valB = b[column];
+      
+      // Handle numeric sorting
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        return (valA - valB) * (this.sortDirection === 'asc' ? 1 : -1);
+      }
+      
+      // Handle string sorting
+      valA = String(valA).toLowerCase();
+      valB = String(valB).toLowerCase();
+      
+      if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    
     this.renderTable();
+    this.renderPagination();
   }
 
   renderTable() {
     const tbody = document.getElementById('tableBody');
-    tbody.innerHTML='';
-    const start=this.itemsPerPage*(this.currentPage-1);
-    const end=start+this.itemsPerPage;
-    const pageData=this.filteredData.slice(start,end);
-    if(!pageData.length){ tbody.innerHTML='<tr><td colspan="9" class="empty-state">⚠️ No results found</td></tr>'; return; }
-    for(const item of pageData){
-      const tr=document.createElement('tr');
-      tr.className=this.getRowClass(item);
-      tr.innerHTML=`
+    tbody.innerHTML = '';
+    
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    const pageData = this.filteredData.slice(start, end);
+    
+    if (pageData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="11" class="empty-state">⚠️ No products match your filters</td></tr>';
+      return;
+    }
+    
+    pageData.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.className = this.getRowClass(item);
+      tr.innerHTML = `
         <td class="sku-cell">${item.sku}</td>
         <td class="asin-cell">${item.asin}</td>
-        <td>${item.name}</td>
+        <td class="product-cell">${item.name}</td>
         <td>${item.condition}</td>
-        <td>${item.available}</td>
-        <td>${item.pendingRemoval}</td>
-        <td>${item.totalInvAge}</td>
-        <td>${item.shippedT30}</td>
-        <td>${item.recommendedAction}</td>
+        <td class="numeric-cell">${item.available.toLocaleString()}</td>
+        <td class="numeric-cell">${item.pendingRemoval.toLocaleString()}</td>
+        <td class="numeric-cell">${item.totalInvAge.toLocaleString()}</td>
+        <td class="numeric-cell">${item.shippedT30.toLocaleString()}</td>
+        <td class="numeric-cell">${item.sellThroughRate}%</td>
+        <td><span class="status-badge ${item.recommendedAction.toLowerCase().includes('removal') ? 'status-recommendation' : item.totalInvAge > 365 ? 'status-warning-badge' : 'status-normal'}">${item.recommendedAction}</span></td>
+        <td class="numeric-cell">${item.riskScore}</td>
       `;
       tbody.appendChild(tr);
-    }
+    });
   }
 
   renderPagination() {
-    const container=document.getElementById('paginationContainer');
-    container.innerHTML='';
-    const totalPages=Math.ceil(this.filteredData.length/this.itemsPerPage);
-    for(let i=1;i<=totalPages;i++){
-      const btn=document.createElement('button');
-      btn.textContent=i;
-      btn.className='page-btn'+(i===this.currentPage?' active':'');
-      btn.addEventListener('click',()=>{this.currentPage=i; this.renderTable(); this.renderPagination();});
-      container.appendChild(btn);
-    }
-  }
-
-  downloadCSV() {
-    if(!this.filteredData.length) return alert("No data to export!");
-    const headers=Object.keys(this.filteredData[0]);
-    const csvContent=[headers.join(',')];
-    this.filteredData.forEach(row=>{ csvContent.push(headers.map(h=>`"${row[h]}"`).join(',')); });
-    const blob=new Blob([csvContent.join('\n')],{type:'text/csv;charset=utf-8;'});
-    const link=document.createElement('a');
-    link.href=URL.createObjectURL(blob);
-    link.download='wesbi_fba_snapshot.csv';
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-  }
-
-  saveSnapshot() {
-    const name = prompt('Enter snapshot name:');
-    if (!name) return;
+    const container = document.getElementById('paginationContainer');
+    container.innerHTML = '';
     
-    this.snapshots[name] = {
-      data: this.rawData,
-      timestamp: new Date().toISOString(),
-      stats: {
-        totalProducts: this.rawData.length,
-        totalAvailable: this.rawData.reduce((sum, i) => sum + i.available, 0),
-        totalPending: this.rawData.reduce((sum, i) => sum + i.pendingRemoval, 0),
-        avgShipped: this.rawData.length ? Math.round(this.rawData.reduce((sum,i)=>sum+i.shippedT30,0)/this.rawData.length) : 0,
-        oldInventory: this.rawData.filter(i => i.totalInvAge > 365).length
+    const totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
+    if (totalPages <= 1) return;
+    
+    // Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '←';
+    prevBtn.className = 'page-btn';
+    prevBtn.disabled = this.currentPage === 1;
+    prevBtn.addEventListener('click', () => {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.renderTable();
+        this.renderPagination();
       }
-    };
+    });
+    container.appendChild(prevBtn);
     
-    localStorage.setItem('wesbiSnapshots', JSON.stringify(this.snapshots));
-    this.updateSnapshotSelector();
-    alert(`Snapshot "${name}" saved!`);
+    // Page numbers with ellipsis
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || 
+          (i >= this.currentPage - 2 && i <= this.currentPage + 2)) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `page-btn ${i === this.currentPage ? 'active' : ''}`;
+        btn.addEventListener('click', () => {
+          this.currentPage = i;
+          this.renderTable();
+          this.renderPagination();
+        });
+        container.appendChild(btn);
+      } else if (i === this.currentPage - 3 || i === this.currentPage + 3) {
+        const ellipsis = document.createElement('span');
+        ellipsis.textContent = '...';
+        ellipsis.style.padding = '0 8px';
+        container.appendChild(ellipsis);
+      }
+    }
+    
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = '→';
+    nextBtn.className = 'page-btn';
+    nextBtn.disabled = this.currentPage === totalPages;
+    nextBtn.addEventListener('click', () => {
+      if (this.currentPage < totalPages) {
+        this.currentPage++;
+        this.renderTable();
+        this.renderPagination();
+      }
+    });
+    container.appendChild(nextBtn);
   }
 
-  updateSnapshotSelector() {
-    const select = document.getElementById('snapshotSelect');
-    select.innerHTML = '<option value="">Select a snapshot...</option>';
+  toggleComparisonMode() {
+    if (Object.keys(this.snapshots).length < 2) {
+      alert('Please upload at least 2 snapshots to enable comparison mode.');
+      return;
+    }
     
-    Object.keys(this.snapshots).forEach(name => {
-      const option = document.createElement('option');
-      option.value = name;
-      option.textContent = name;
-      select.appendChild(option);
+    this.comparisonMode = !this.comparisonMode;
+    const comparisonView = document.getElementById('comparisonView');
+    comparisonView.style.display = this.comparisonMode ? 'block' : 'none';
+    
+    if (this.comparisonMode) {
+      // Load comparison data (simplified for demo)
+      this.comparisonData = this.compareSnapshots();
+      this.filteredData = this.comparisonData;
+      document.getElementById('comparisonInfo').textContent = 'Comparing latest snapshots';
+    } else {
+      // Return to normal mode
+      const snapshotNames = Object.keys(this.snapshots);
+      if (snapshotNames.length > 0) {
+        const latestSnapshot = snapshotNames[snapshotNames.length - 1];
+        this.currentData = [...this.snapshots[latestSnapshot].data];
+        this.filteredData = [...this.currentData];
+      }
+    }
+    
+    this.updateUI();
+  }
+
+  exitComparisonMode() {
+    this.comparisonMode = false;
+    document.getElementById('comparisonView').style.display = 'none';
+    
+    // Return to normal mode
+    const snapshotNames = Object.keys(this.snapshots);
+    if (snapshotNames.length > 0) {
+      const latestSnapshot = snapshotNames[snapshotNames.length - 1];
+      this.currentData = [...this.snapshots[latestSnapshot].data];
+      this.filteredData = [...this.currentData];
+    }
+    
+    this.updateUI();
+  }
+
+  compareSnapshots() {
+    // Simplified comparison logic
+    // In real implementation, this would compare two specific snapshots
+    const snapshotNames = Object.keys(this.snapshots);
+    if (snapshotNames.length < 2) return [];
+    
+    const snap1 = this.snapshots[snapshotNames[snapshotNames.length - 1]].data;
+    const snap2 = this.snapshots[snapshotNames[snapshotNames.length - 2]].data;
+    
+    // Create comparison data
+    return snap1.map(item => {
+      const oldItem = snap2.find(old => old.sku === item.sku);
+      if (oldItem) {
+        return {
+          ...item,
+          inventoryChange: item.available - oldItem.available,
+          shippedChange: item.shippedT30 - oldItem.shippedT30,
+          ageChange: item.totalInvAge - oldItem.totalInvAge
+        };
+      }
+      return item;
     });
   }
 
-  deleteSnapshot() {
-    const name = document.getElementById('snapshotSelect').value;
-    if (!name) return alert('Please select a snapshot to delete');
-    
-    if (confirm(`Delete snapshot "${name}"?`)) {
-      delete this.snapshots[name];
-      localStorage.setItem('wesbiSnapshots', JSON.stringify(this.snapshots));
-      this.updateSnapshotSelector();
-      alert(`Snapshot "${name}" deleted!`);
+  showAlerts() {
+    if (this.alerts.length === 0) {
+      alert('No alerts found!');
+      return;
     }
+    
+    const alertsText = this.alerts.map(alert => alert.message).join('\n\n');
+    alert(`🚨 WesBI Alerts:\n\n${alertsText}`);
   }
 
-  toggleCompareMode() {
-    const controls = document.getElementById('compareControls');
-    controls.style.display = controls.style.display === 'none' ? 'flex' : 'none';
-    
-    if (controls.style.display === 'flex') {
-      this.updateCompareSelectors();
+  exportData() {
+    if (this.filteredData.length === 0) {
+      alert('No data to export!');
+      return;
     }
-  }
-
-  updateCompareSelectors() {
-    const select1 = document.getElementById('compareSnapshot1');
-    const select2 = document.getElementById('compareSnapshot2');
     
-    [select1, select2].forEach(select => {
-      select.innerHTML = '<option value="">Select snapshot...</option>';
-      Object.keys(this.snapshots).forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        select.appendChild(option);
+    const headers = Object.keys(this.filteredData[0]).filter(key => 
+      !['timestamp', 'category'].includes(key)
+    );
+    const csvContent = [headers.join(',')];
+    
+    this.filteredData.forEach(row => {
+      const rowValues = headers.map(header => {
+        const value = row[header];
+        if (typeof value === 'string' && value.includes(',')) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value;
       });
+      csvContent.push(rowValues.join(','));
     });
+    
+    const blob = new Blob([csvContent.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `wesbi_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
-  runComparison() {
-    const snap1 = document.getElementById('compareSnapshot1').value;
-    const snap2 = document.getElementById('compareSnapshot2').value;
-    
-    if (!snap1 || !snap2) {
-      return alert('Please select two snapshots to compare');
-    }
-    
-    const data1 = this.snapshots[snap1].data;
-    const data2 = this.snapshots[snap2].data;
-    
-    // Create comparison view
-    const comparisonData = this.compareSnapshots(data1, data2);
-    
-    // Show comparison results
-    alert(`Comparison complete!\n${snap1} vs ${snap2}\n\nProducts: ${data1.length} → ${data2.length}\nAvailable: ${data1.reduce((sum, i) => sum + i.available, 0)} → ${data2.reduce((sum, i) => sum + i.available, 0)}`);
-  }
-
-  compareSnapshots(data1, data2) {
-    // This would contain the actual comparison logic
-    // For now, just return the comparison data
-    return { data1, data2 };
-  }
-
-  closeComparison() {
-    document.getElementById('compareControls').style.display = 'none';
+  exportChart(chartType) {
+    // Chart export would be implemented here
+    alert(`Export functionality for ${chartType} chart prepared for implementation.`);
   }
 
   filterByCard(filterType) {
     switch(filterType) {
-      case 'totalPending':
+      case 'pendingRemovals':
         document.getElementById('actionFilter').value = 'removal';
-        this.applyFilters();
         break;
-      case 'oldInventory':
-        // For now, just show a message
-        alert('Filtering by old inventory...');
+      case 'atRiskSKUs':
+        // Apply filters for at-risk SKUs
+        document.getElementById('ageFilter').value = '365+';
+        break;
+      case 'sellThroughRate':
+        // This would filter by high sell-through
         break;
       default:
-        // Reset filters for other cards
-        document.getElementById('actionFilter').value = '';
-        document.getElementById('conditionFilter').value = '';
-        this.applyFilters();
+        // Reset filters
+        this.resetFilters();
+        return;
     }
+    this.applyFilters();
   }
 }
 
-const dashboard = new WesBI();
+// Initialize the WesBI Beast Mode dashboard
+const wesBI = new WesBIBeastMode();
+
+// Handle drag and drop for file uploads
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.querySelector('.container');
+  container.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    container.style.borderColor = '#9c4dff';
+  });
+  
+  container.addEventListener('dragleave', () => {
+    container.style.borderColor = '';
+  });
+  
+  container.addEventListener('drop', (e) => {
+    e.preventDefault();
+    container.style.borderColor = '';
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const fileInput = document.getElementById('csvFile');
+      fileInput.files = files;
+      wesBI.showLoader(true, "Processing dropped files...");
+      setTimeout(() => wesBI.processCSVs(), 100);
+    }
+  });
+});
 </script>
 </body>
 </html>
-
