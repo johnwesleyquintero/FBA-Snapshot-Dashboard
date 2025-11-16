@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FBA Snapshot Dashboard v2.1</title>
+<title>FBA Snapshot Dashboard v2.2</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><polygon points='8,0 16,16 0,16' fill='%239c4dff'/></svg>">
 <style>
 :root {
@@ -115,7 +115,7 @@ body {
 }
 .stats-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 20px;
   padding: 20px 30px;
   background: var(--light);
@@ -138,6 +138,59 @@ body {
 .stat-label {
   font-size: 0.9rem;
   color: var(--gray);
+}
+.chart-container {
+  padding: 20px 30px;
+  background: var(--light);
+  border-bottom: 1px solid var(--border);
+}
+.chart-title {
+  text-align: center;
+  margin-bottom: 15px;
+  color: var(--dark);
+  font-weight: 600;
+}
+.chart {
+  height: 100px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px 0;
+}
+.bar {
+  flex: 1;
+  background: var(--primary);
+  min-width: 30px;
+  transition: height 0.5s ease;
+}
+.bar-label {
+  font-size: 0.7rem;
+  text-align: center;
+  color: var(--gray);
+  margin-top: 5px;
+}
+.column-toggle {
+  padding: 15px 30px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+}
+.column-toggle h3 {
+  margin-bottom: 10px;
+  color: var(--dark);
+}
+.column-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.column-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.column-option input {
+  margin: 0;
 }
 .table-container {
   padding: 20px;
@@ -194,6 +247,10 @@ tr:hover {
   background-color: #fff3cd !important;
   animation: pulseWarning 3s infinite;
 }
+.status-both {
+  background: linear-gradient(45deg, #fff8e1, #fff3cd) !important;
+  animation: pulseBoth 3s infinite;
+}
 @keyframes pulse {
   0% { background-color: #fff8e1; }
   50% { background-color: #fff0c1; }
@@ -203,6 +260,11 @@ tr:hover {
   0% { background-color: #fff3cd; }
   50% { background-color: #ffeaa7; }
   100% { background-color: #fff3cd; }
+}
+@keyframes pulseBoth {
+  0% { background: linear-gradient(45deg, #fff8e1, #fff3cd); }
+  50% { background: linear-gradient(45deg, #fff0c1, #ffeaa7); }
+  100% { background: linear-gradient(45deg, #fff8e1, #fff3cd); }
 }
 .status-badge {
   display: inline-block;
@@ -302,7 +364,7 @@ tr:hover {
 <body>
 <div class="container">
   <div class="header">
-    <h1>🚀 FBA Snapshot Dashboard v2.1</h1>
+    <h1>🚀 FBA Snapshot Dashboard v2.2</h1>
     <p>Upload your FBA inventory report to get instant insights and recommendations</p>
   </div>
   
@@ -332,6 +394,11 @@ tr:hover {
     </div>
   </div>
   
+  <div class="chart-container">
+    <div class="chart-title">Inventory Age Distribution</div>
+    <div class="chart" id="inventoryChart"></div>
+  </div>
+  
   <div class="stats-container" id="statsContainer">
     <div class="stat-card">
       <div class="stat-label">Total Products</div>
@@ -352,6 +419,21 @@ tr:hover {
     <div class="stat-card">
       <div class="stat-label">Old Inventory (365+ days)</div>
       <div class="stat-value" id="oldInventory">0</div>
+    </div>
+  </div>
+  
+  <div class="column-toggle">
+    <h3>Columns</h3>
+    <div class="column-options">
+      <label class="column-option"><input type="checkbox" data-column="sku" checked> SKU</label>
+      <label class="column-option"><input type="checkbox" data-column="asin" checked> ASIN</label>
+      <label class="column-option"><input type="checkbox" data-column="name" checked> Product Name</label>
+      <label class="column-option"><input type="checkbox" data-column="condition" checked> Condition</label>
+      <label class="column-option"><input type="checkbox" data-column="available" checked> Available</label>
+      <label class="column-option"><input type="checkbox" data-column="pendingRemoval" checked> Pending Removal</label>
+      <label class="column-option"><input type="checkbox" data-column="totalInvAge" checked> Total Inventory Age</label>
+      <label class="column-option"><input type="checkbox" data-column="shippedT30" checked> Units Shipped T30</label>
+      <label class="column-option"><input type="checkbox" data-column="recommendedAction" checked> Recommended Action</label>
     </div>
   </div>
   
@@ -393,6 +475,24 @@ class FBADashboard {
     this.itemsPerPage = 50;
     this.sortColumn = null;
     this.sortDirection = 'asc';
+    this.visibleColumns = new Set(['sku', 'asin', 'name', 'condition', 'available', 'pendingRemoval', 'totalInvAge', 'shippedT30', 'recommendedAction']);
+    this.mapping = {
+      sku: 'sku',
+      asin: 'asin',
+      name: 'product-name',
+      condition: 'condition',
+      available: 'available',
+      pendingRemoval: 'pending-removal-quantity',
+      shippedT30: 'units-shipped-t30',
+      invAgeFields: [
+        'inv-age-0-to-90-days',
+        'inv-age-91-to-180-days',
+        'inv-age-181-to-270-days',
+        'inv-age-271-to-365-days',
+        'inv-age-365-plus-days'
+      ],
+      recommendedAction: 'recommended-action'
+    };
     this.init();
   }
   
@@ -408,6 +508,11 @@ class FBADashboard {
     document.querySelectorAll('th[data-sort]').forEach(header => {
       header.addEventListener('click', () => this.sortTable(header.dataset.sort));
     });
+    
+    // Add event listeners for column toggles
+    document.querySelectorAll('.column-options input[type="checkbox"]').forEach(checkbox => {
+      checkbox.addEventListener('change', () => this.toggleColumn(checkbox.dataset.column, checkbox.checked));
+    });
   }
   
   processCSV() {
@@ -421,24 +526,28 @@ class FBADashboard {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        this.rawData = results.data.map(row => ({
-          sku: row['sku'] || '',
-          asin: row['asin'] || '',
-          name: row['product-name'] || '',
-          condition: row['condition'] || '',
-          available: Number(row['available'] || 0),
-          pendingRemoval: Number(row['pending-removal-quantity'] || 0),
-          totalInvAge: Number(row['inv-age-0-to-90-days'] || 0) +
-                       Number(row['inv-age-91-to-180-days'] || 0) +
-                       Number(row['inv-age-181-to-270-days'] || 0) +
-                       Number(row['inv-age-271-to-365-days'] || 0) +
-                       Number(row['inv-age-365-plus-days'] || 0),
-          shippedT30: Number(row['units-shipped-t30'] || 0),
-          recommendedAction: row['recommended-action'] || 'No Action'
-        }));
+        this.rawData = results.data.map(row => {
+          // Calculate total inventory age dynamically
+          const totalInvAge = this.mapping.invAgeFields.reduce((sum, field) => {
+            return sum + Number(row[field] || 0);
+          }, 0);
+          
+          return {
+            sku: row[this.mapping.sku] || '',
+            asin: row[this.mapping.asin] || '',
+            name: row[this.mapping.name] || '',
+            condition: row[this.mapping.condition] || '',
+            available: Number(row[this.mapping.available] || 0),
+            pendingRemoval: Number(row[this.mapping.pendingRemoval] || 0),
+            totalInvAge: totalInvAge,
+            shippedT30: Number(row[this.mapping.shippedT30] || 0),
+            recommendedAction: row[this.mapping.recommendedAction] || 'No Action'
+          };
+        });
         
         this.filteredData = [...this.rawData];
         this.updateStats();
+        this.renderChart();
         this.renderTable();
         this.renderPagination();
         alert(`✅ Processed ${this.rawData.length} products!`);
@@ -465,6 +574,44 @@ class FBADashboard {
     document.getElementById('totalPending').textContent = totalPending.toLocaleString();
     document.getElementById('avgShipped').textContent = avgShipped.toLocaleString();
     document.getElementById('oldInventory').textContent = oldInventory.toLocaleString();
+  }
+  
+  renderChart() {
+    const chartContainer = document.getElementById('inventoryChart');
+    if (this.rawData.length === 0) {
+      chartContainer.innerHTML = '<div style="text-align:center; color:var(--gray);">Upload data to see inventory chart</div>';
+      return;
+    }
+    
+    // Calculate age distribution
+    const ageGroups = {
+      '0-90': 0,
+      '91-180': 0,
+      '181-270': 0,
+      '271-365': 0,
+      '365+': 0
+    };
+    
+    this.rawData.forEach(item => {
+      if (item.totalInvAge <= 90) ageGroups['0-90']++;
+      else if (item.totalInvAge <= 180) ageGroups['91-180']++;
+      else if (item.totalInvAge <= 270) ageGroups['181-270']++;
+      else if (item.totalInvAge <= 365) ageGroups['271-365']++;
+      else ageGroups['365+']++;
+    });
+    
+    const maxValue = Math.max(...Object.values(ageGroups));
+    const bars = Object.entries(ageGroups).map(([label, value]) => {
+      const height = maxValue > 0 ? (value / maxValue) * 80 : 0;
+      return `
+        <div style="display:flex; flex-direction:column; align-items:center; flex:1; min-width:0;">
+          <div class="bar" style="height:${height}px; background:${label === '365+' ? 'var(--warning)' : 'var(--primary)'};"></div>
+          <div class="bar-label">${label}<br>${value}</div>
+        </div>
+      `;
+    });
+    
+    chartContainer.innerHTML = bars.join('');
   }
   
   applyFilters() {
@@ -520,9 +667,9 @@ class FBADashboard {
       let valA = a[column];
       let valB = b[column];
       
-      // Handle numeric sorting
-      if (column === 'available' || column === 'pendingRemoval' || 
-          column === 'totalInvAge' || column === 'shippedT30') {
+      // Handle numeric sorting dynamically
+      const isNumeric = !isNaN(Number(valA)) && !isNaN(Number(valB));
+      if (isNumeric) {
         valA = Number(valA);
         valB = Number(valB);
       } else {
@@ -539,6 +686,15 @@ class FBADashboard {
     this.renderPagination();
   }
   
+  toggleColumn(column, visible) {
+    if (visible) {
+      this.visibleColumns.add(column);
+    } else {
+      this.visibleColumns.delete(column);
+    }
+    this.renderTable();
+  }
+  
   renderTable() {
     const tbody = document.getElementById('tableBody');
     if (this.filteredData.length === 0) {
@@ -550,26 +706,42 @@ class FBADashboard {
     const end = start + this.itemsPerPage;
     const pageData = this.filteredData.slice(start, end);
     
+    // Build table headers based on visible columns
+    const headers = Array.from(this.visibleColumns);
+    const tableHeaders = headers.map(col => {
+      const headerMap = {
+        sku: 'SKU',
+        asin: 'ASIN',
+        name: 'Product Name',
+        condition: 'Condition',
+        available: 'Available',
+        pendingRemoval: 'Pending Removal',
+        totalInvAge: 'Total Inventory Age',
+        shippedT30: 'Units Shipped T30',
+        recommendedAction: 'Recommended Action'
+      };
+      return headerMap[col] || col;
+    });
+    
     tbody.innerHTML = pageData.map(item => {
       const needsAttention = item.recommendedAction.toLowerCase().includes('removal');
       const hasOldInventory = item.totalInvAge > 365;
-      const rowClass = needsAttention ? 'highlight' : hasOldInventory ? 'status-warning' : '';
+      const rowClasses = [];
+      if (needsAttention) rowClasses.push('highlight');
+      if (hasOldInventory) rowClasses.push('status-warning');
+      if (needsAttention && hasOldInventory) rowClasses.push('status-both');
       
       return `
-        <tr class="${rowClass}">
-          <td class="sku-cell">${item.sku}</td>
-          <td class="asin-cell">${item.asin}</td>
-          <td>${item.name}</td>
-          <td>${item.condition}</td>
-          <td>${item.available.toLocaleString()}</td>
-          <td>${item.pendingRemoval.toLocaleString()}</td>
-          <td>${item.totalInvAge.toLocaleString()}</td>
-          <td>${item.shippedT30.toLocaleString()}</td>
-          <td>
-            <span class="status-badge ${needsAttention ? 'status-recommendation' : hasOldInventory ? 'status-warning-badge' : 'status-normal'}">
-              ${item.recommendedAction}
-            </span>
-          </td>
+        <tr class="${rowClasses.join(' ')}">
+          ${headers.includes('sku') ? `<td class="sku-cell">${item.sku}</td>` : ''}
+          ${headers.includes('asin') ? `<td class="asin-cell">${item.asin}</td>` : ''}
+          ${headers.includes('name') ? `<td>${item.name}</td>` : ''}
+          ${headers.includes('condition') ? `<td>${item.condition}</td>` : ''}
+          ${headers.includes('available') ? `<td>${item.available.toLocaleString()}</td>` : ''}
+          ${headers.includes('pendingRemoval') ? `<td>${item.pendingRemoval.toLocaleString()}</td>` : ''}
+          ${headers.includes('totalInvAge') ? `<td>${item.totalInvAge.toLocaleString()}</td>` : ''}
+          ${headers.includes('shippedT30') ? `<td>${item.shippedT30.toLocaleString()}</td>` : ''}
+          ${headers.includes('recommendedAction') ? `<td><span class="status-badge ${needsAttention ? 'status-recommendation' : hasOldInventory ? 'status-warning-badge' : 'status-normal'}">${item.recommendedAction}</span></td>` : ''}
         </tr>
       `;
     }).join('');
@@ -586,6 +758,9 @@ class FBADashboard {
     
     let paginationHTML = '';
     
+    // First page button
+    paginationHTML += `<button class="page-btn" onclick="dashboard.goToPage(1)" ${this.currentPage === 1 ? 'disabled' : ''}><<</button>`;
+    
     // Previous button
     paginationHTML += `<button class="page-btn" onclick="dashboard.goToPage(${this.currentPage > 1 ? this.currentPage - 1 : 1})" ${this.currentPage === 1 ? 'disabled' : ''}>←</button>`;
     
@@ -600,6 +775,9 @@ class FBADashboard {
     
     // Next button
     paginationHTML += `<button class="page-btn" onclick="dashboard.goToPage(${this.currentPage < totalPages ? this.currentPage + 1 : totalPages})" ${this.currentPage === totalPages ? 'disabled' : ''}>→</button>`;
+    
+    // Last page button
+    paginationHTML += `<button class="page-btn" onclick="dashboard.goToPage(${totalPages})" ${this.currentPage === totalPages ? 'disabled' : ''}>>></button>`;
     
     container.innerHTML = paginationHTML;
   }
@@ -619,7 +797,15 @@ class FBADashboard {
       return;
     }
     
-    const csv = Papa.unparse(this.filteredData);
+    // Add metadata to CSV
+    const metadata = [
+      ['FBA Snapshot Export'],
+      ['Generated on:', new Date().toISOString()],
+      ['Filtered products:', this.filteredData.length],
+      ['']
+    ];
+    
+    const csv = Papa.unparse([...metadata, ...this.filteredData]);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -632,6 +818,26 @@ class FBADashboard {
 
 // Initialize dashboard
 const dashboard = new FBADashboard();
+
+// Load saved column preferences
+window.addEventListener('load', () => {
+  const savedColumns = localStorage.getItem('fbaDashboardColumns');
+  if (savedColumns) {
+    const columns = JSON.parse(savedColumns);
+    document.querySelectorAll('.column-options input[type="checkbox"]').forEach(checkbox => {
+      checkbox.checked = columns.includes(checkbox.dataset.column);
+    });
+  }
+});
+
+// Save column preferences
+document.querySelectorAll('.column-options input[type="checkbox"]').forEach(checkbox => {
+  checkbox.addEventListener('change', () => {
+    const visibleColumns = Array.from(document.querySelectorAll('.column-options input[type="checkbox"]:checked'))
+      .map(input => input.dataset.column);
+    localStorage.setItem('fbaDashboardColumns', JSON.stringify(visibleColumns));
+  });
+});
 </script>
 </body>
 </html>
